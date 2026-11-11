@@ -145,7 +145,7 @@
     </div>
 
     <script>
-      // Tu URL de Google Apps Script ya integrada
+      // Tu URL exacta de Google Apps Script
       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwBm1m4V3NWtdOOXElD9styluh501T0oLPK2n0Evrt0-He2EbyrSc9XIkXrgIjU7vb3MA/exec";
 
       let personas = [];
@@ -177,3 +177,30 @@
           .then(response => response.json())
           .then(data => {
             personas = data;
+            if (personas.length === 0) {
+              document.getElementById('contenido').innerHTML = `
+                <p id="mensaje" style="color: #888; font-style: italic;">No hay fotos registradas todavía.</p>
+                <button class="accent" onclick="cambiarVista('subir')" style="margin-top: 15px; padding: 12px 24px; font-size: 16px;">➕ Subir la primera foto</button>
+              `;
+              document.getElementById('botonesControles').style.display = 'flex';
+            } else {
+              document.getElementById('botonesControles').style.display = 'flex';
+              if (indiceActual >= personas.length) indiceActual = 0;
+              mostrarPersona();
+              
+              if (iniciarSlideshow) {
+                iniciarAutoPlay();
+              }
+            }
+          })
+          .catch(error => {
+            document.getElementById('mensaje').innerText = "Error al cargar los datos.";
+            console.error(error);
+          });
+      }
+
+      function mostrarPersona() {
+        if (personas.length === 0) return;
+        var p = personas[indiceActual];
+        
+        var urlFoto = p.foto;
