@@ -204,3 +204,110 @@
         var p = personas[indiceActual];
         
         var urlFoto = p.foto;
+        if (urlFoto && urlFoto.includes("googleusercontent.com/d/")) {
+          var fileId = urlFoto.split("googleusercontent.com/d/")[1];
+          if (fileId) {
+            urlFoto = "https://drive.google.com/uc?export=view&id=" + fileId;
+          }
+        }
+        
+        var html = `
+          <img src="${urlFoto}" alt="${p.nombre}">
+          <h2>${p.nombre}</h2>
+          <p style="color: #aaa; font-size: 14px;">(${indiceActual + 1} de ${personas.length})</p>
+        `;
+        document.getElementById('contenido').innerHTML = html;
+      }
+
+      function siguiente() {
+        if (personas.length === 0) return;
+        indiceActual = (indiceActual + 1) % personas.length;
+        mostrarPersona();
+      }
+
+      function anterior() {
+        if (personas.length === 0) return;
+        indiceActual = (indiceActual - 1 + personas.length) % personas.length;
+        mostrarPersona();
+      }
+
+      function iniciarAutoPlay() {
+        if (intervaloAuto) clearInterval(intervaloAuto);
+        intervaloAuto = setInterval(function() {
+          if (estaReproduciendo) {
+            siguiente();
+          }
+        }, 4000);
+      }
+
+      function toggleAuto() {
+        estaReproduciendo = !estaReproduciendo;
+        var btn = document.getElementById('btnAuto');
+        if (estaReproduciendo) {
+          btn.innerText = "Pausar Auto-Play";
+          btn.classList.add('primary');
+        } else {
+          btn.innerText = "Reanudar Auto-Play";
+          btn.classList.remove('primary');
+        }
+      }
+
+      function recargarDatos() {
+        cargarDatos(false);
+      }
+
+      function enviarFoto() {
+        var nombre = document.getElementById('nombreInput').value.trim();
+        var input = document.getElementById('archivoInput');
+        var status = document.getElementById('status');
+        var btn = document.getElementById('subirBtn');
+
+        if (!nombre || input.files.length === 0) {
+          status.style.color = "#E91E63";
+          status.innerText = "Por favor completa todos los campos.";
+          return;
+        }
+
+        var file = input.files[0];
+        var reader = new FileReader();
+
+        status.style.color = "#0288D1";
+        status.innerText = "Subiendo archivo...";
+        btn.disabled = true;
+
+        reader.onload = function(e) {
+          var rawData = e.target.result.split(',')[1];
+          
+          var payload = {
+            nombre: nombre,
+            filename: file.name,
+            mimeType: file.type,
+            data: rawData
+          };
+
+          fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          })
+          .then(res => res.json())
+          .then(respuesta => {
+            status.style.color = "#4CAF50";
+            status.innerText = "¡Foto subida con éxito! Volviendo al slideshow...";
+            btn.disabled = false;
+            
+            setTimeout(function() {
+              cambiarVista('slideshow');
+            }, 1200);
+          })
+          .catch(err => {
+            status.style.color = "#E91E63";
+            status.innerText = "Error al subir la imagen.";
+            btn.disabled = false;
+          });
+        };
+
+        reader.readAsDataURL(file);
+      }
+    </script>
+  </body>
+</html>
