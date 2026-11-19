@@ -10,10 +10,6 @@
         background-color: #121212;
         color: #ffffff;
         margin: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
         min-height: 100vh;
         overflow-x: hidden;
       }
@@ -22,45 +18,144 @@
         display: none;
         width: 100%;
         min-height: 100vh;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 16px;
         box-sizing: border-box;
       }
       .view.active {
         display: flex;
       }
 
+      /* VISTA 1: MURO TIPO INSTAGRAM */
+      #vistaMuro {
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 14px 40px;
+      }
+      .muro-header {
+        width: 100%;
+        max-width: 960px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #2a2a2a;
+      }
+      .muro-header h1 {
+        margin: 0;
+        font-size: 22px;
+        letter-spacing: 0.5px;
+      }
+      .muro-acciones {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .muro-grid {
+        width: 100%;
+        max-width: 960px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      @media (min-width: 640px) {
+        .muro-grid {
+          gap: 14px;
+        }
+      }
+      .muro-item {
+        position: relative;
+        aspect-ratio: 1 / 1;
+        background: #1e1e1e;
+        border-radius: 6px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 1px solid #2b2b2b;
+        transition: transform 0.18s ease, border-color 0.18s ease;
+      }
+      .muro-item:hover {
+        transform: scale(1.015);
+        border-color: #555;
+      }
+      .muro-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .muro-caption {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 18px 8px 6px;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.82));
+        font-size: 12px;
+        font-weight: 600;
+        color: #fff;
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .muro-fallback {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        box-sizing: border-box;
+        font-size: 12px;
+        color: #bbb;
+        text-align: center;
+      }
+
+      /* VISTA 2: SLIDESHOW AL TOCAR UNA FOTO */
+      #vistaSlideshow {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 16px;
+      }
       .container {
         max-width: 92%;
         max-height: 85vh;
       }
-      img {
+      .slide-img {
         max-width: 100%;
-        max-height: 50vh;
+        max-height: 55vh;
         border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.65);
         object-fit: contain;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
       }
       h2 {
-        margin: 10px 0;
-        font-size: 26px;
-        letter-spacing: 1px;
+        margin: 8px 0;
+        font-size: 24px;
+        letter-spacing: 0.5px;
       }
       .controls {
-        margin-top: 20px;
+        margin-top: 18px;
         display: flex;
-        gap: 12px;
+        gap: 10px;
         justify-content: center;
         flex-wrap: wrap;
       }
 
+      /* VISTA 3: FORMULARIO DE SUBIDA */
+      #vistaSubir {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
       .card {
         background: #1e1e1e;
-        padding: 30px;
+        padding: 28px;
         border-radius: 12px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         width: 100%;
@@ -70,7 +165,7 @@
         border: 1px solid #333;
       }
       .card h2 { text-align: center; color: #fff; font-size: 22px; }
-      .form-group { margin-bottom: 20px; }
+      .form-group { margin-bottom: 18px; }
       label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #ccc; }
       input[type="text"], input[type="file"] {
         width: 100%;
@@ -87,7 +182,7 @@
         background-color: #1f1f1f;
         color: white;
         border: 1px solid #444;
-        padding: 10px 18px;
+        padding: 10px 16px;
         border-radius: 6px;
         cursor: pointer;
         font-size: 14px;
@@ -100,30 +195,49 @@
       button.info:hover { background-color: #0277BD; }
       button.accent { background-color: #E91E63; border: none; font-weight: bold; }
       button.accent:hover { background-color: #C2185B; }
-      
+
       #status { margin-top: 15px; font-size: 14px; font-weight: 600; text-align: center; }
+      .estado-muro {
+        width: 100%;
+        max-width: 960px;
+        text-align: center;
+        padding: 40px 16px;
+      }
     </style>
   </head>
   <body>
 
-    <!-- VISTA 1: SLIDESHOW -->
-    <div id="vistaSlideshow" class="view active">
-      <div class="container">
-        <div id="contenido">
-          <p id="mensaje" style="color: #888; font-style: italic;">Cargando galería...</p>
+    <!-- VISTA 1: MURO INICIAL TIPO INSTAGRAM -->
+    <div id="vistaMuro" class="view active">
+      <div class="muro-header">
+        <h1>📸 Galería</h1>
+        <div class="muro-acciones">
+          <button class="info" onclick="recargarDatos()">🔄 Actualizar</button>
+          <button class="accent" onclick="cambiarVista('subir')">➕ Subir mi Foto</button>
         </div>
+      </div>
 
-        <div class="controls" id="botonesControles" style="display:none;">
+      <div id="contenidoMuro" class="estado-muro">
+        <p id="mensaje" style="color: #888; font-style: italic;">Cargando galería...</p>
+      </div>
+    </div>
+
+    <!-- VISTA 2: SLIDESHOW (SE ABRE AL DAR CLIC EN UNA FOTO) -->
+    <div id="vistaSlideshow" class="view">
+      <div class="container">
+        <div id="contenidoSlide"></div>
+
+        <div class="controls" id="botonesControles">
+          <button onclick="cambiarVista('muro')">🧱 Ver Muro</button>
           <button onclick="anterior()">❮ Anterior</button>
           <button id="btnAuto" class="primary" onclick="toggleAuto()">Pausar Auto-Play</button>
           <button onclick="siguiente()">Siguiente ❯</button>
-          <button class="info" onclick="recargarDatos()">🔄 Actualizar</button>
           <button class="accent" onclick="cambiarVista('subir')">➕ Subir mi Foto</button>
         </div>
       </div>
     </div>
 
-    <!-- VISTA 2: FORMULARIO -->
+    <!-- VISTA 3: FORMULARIO -->
     <div id="vistaSubir" class="view">
       <div class="card">
         <h2>Sube tu Fotografía</h2>
@@ -139,8 +253,8 @@
           <input type="file" id="archivoInput" accept="image/*" required>
         </div>
 
-        <button class="primary" style="width:100%; padding: 12px; margin-bottom: 10px;" id="subirBtn" onclick="enviarFoto()">Subir y Ver Galería</button>
-        <button style="width:100%; background: #444; border:none; padding: 10px;" onclick="cambiarVista('slideshow')">Volver al Slideshow</button>
+        <button class="primary" style="width:100%; padding: 12px; margin-bottom: 10px;" id="subirBtn" onclick="enviarFoto()">Subir y Ver Muro</button>
+        <button style="width:100%; background: #444; border:none; padding: 10px;" onclick="cambiarVista('muro')">Volver al Muro</button>
         
         <div id="status"></div>
       </div>
@@ -154,26 +268,54 @@
       let indiceActual = 0;
       let intervaloAuto = null;
       let estaReproduciendo = true;
-      let iniciarSlideshowPendiente = true;
       let timerCarga = null;
 
       window.onload = function() {
-        cargarDatos(true);
+        cargarDatos();
       };
 
+      function detenerAutoPlay() {
+        if (intervaloAuto) {
+          clearInterval(intervaloAuto);
+          intervaloAuto = null;
+        }
+      }
+
+      function iniciarAutoPlay() {
+        detenerAutoPlay();
+        intervaloAuto = setInterval(function() {
+          if (estaReproduciendo && document.getElementById('vistaSlideshow').classList.contains('active')) {
+            siguiente();
+          }
+        }, 4000);
+      }
+
       function cambiarVista(vista) {
+        document.getElementById('vistaMuro').classList.remove('active');
         document.getElementById('vistaSlideshow').classList.remove('active');
         document.getElementById('vistaSubir').classList.remove('active');
 
-        if (vista === 'slideshow') {
+        if (vista === 'muro') {
+          detenerAutoPlay();
+          document.getElementById('vistaMuro').classList.add('active');
+          renderizarMuro();
+        } else if (vista === 'slideshow') {
           document.getElementById('vistaSlideshow').classList.add('active');
-          recargarDatos();
+          mostrarPersona();
+          iniciarAutoPlay();
         } else if (vista === 'subir') {
+          detenerAutoPlay();
           document.getElementById('vistaSubir').classList.add('active');
           document.getElementById('status').innerText = "";
           document.getElementById('nombreInput').value = "";
           document.getElementById('archivoInput').value = "";
         }
+      }
+
+      function abrirSlideshowEnFoto(indice) {
+        if (indice < 0 || indice >= personas.length) return;
+        indiceActual = indice;
+        cambiarVista('slideshow');
       }
 
       function extraerIdDrive(url) {
@@ -189,6 +331,54 @@
           return limpio;
         }
         return "";
+      }
+
+      function obtenerUrlImagen(fotoOriginal) {
+        var fileId = extraerIdDrive(fotoOriginal);
+        return fileId
+          ? "https://drive.google.com/thumbnail?id=" + encodeURIComponent(fileId) + "&sz=w1000"
+          : fotoOriginal;
+      }
+
+      function escaparHtml(texto) {
+        return String(texto || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function renderizarMuro() {
+        var contenedor = document.getElementById('contenidoMuro');
+
+        if (personas.length === 0) {
+          contenedor.className = "estado-muro";
+          contenedor.innerHTML = `
+            <p style="color: #888; font-style: italic;">No hay fotos registradas todavía.</p>
+            <button class="accent" onclick="cambiarVista('subir')" style="margin-top: 15px; padding: 12px 24px; font-size: 16px;">➕ Subir la primera foto</button>
+          `;
+          return;
+        }
+
+        contenedor.className = "muro-grid";
+        var html = "";
+
+        personas.forEach(function(p, idx) {
+          var urlFoto = obtenerUrlImagen(p.foto);
+          var nombreSeguro = escaparHtml(p.nombre);
+          html += `
+            <div class="muro-item" onclick="abrirSlideshowEnFoto(${idx})" title="Ver en slideshow: ${nombreSeguro}">
+              <img src="${urlFoto}" alt="${nombreSeguro}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="muro-fallback" style="display:none;">
+                <span>Sin vista previa</span>
+                <strong>${nombreSeguro}</strong>
+              </div>
+              <div class="muro-caption">${nombreSeguro}</div>
+            </div>
+          `;
+        });
+
+        contenedor.innerHTML = html;
       }
 
       window.recibirHojaGviz = function(resp) {
@@ -227,26 +417,19 @@
         });
 
         personas = lista;
-        if (personas.length === 0) {
-          document.getElementById('contenido').innerHTML = `
-            <p id="mensaje" style="color: #888; font-style: italic;">No hay fotos registradas todavía.</p>
-            <button class="accent" onclick="cambiarVista('subir')" style="margin-top: 15px; padding: 12px 24px; font-size: 16px;">➕ Subir la primera foto</button>
-          `;
-          document.getElementById('botonesControles').style.display = 'flex';
-        } else {
-          document.getElementById('botonesControles').style.display = 'flex';
-          if (indiceActual >= personas.length) indiceActual = 0;
-          mostrarPersona();
+        if (indiceActual >= personas.length) indiceActual = 0;
 
-          if (iniciarSlideshowPendiente) {
-            iniciarAutoPlay();
-          }
+        if (document.getElementById('vistaSlideshow').classList.contains('active')) {
+          mostrarPersona();
+        } else {
+          renderizarMuro();
         }
       };
 
-      function cargarDatos(iniciarSlideshow) {
-        iniciarSlideshowPendiente = iniciarSlideshow;
-        document.getElementById('contenido').innerHTML = `<p id="mensaje" style="color: #888; font-style: italic;">Cargando galería...</p>`;
+      function cargarDatos() {
+        var contenedor = document.getElementById('contenidoMuro');
+        contenedor.className = "estado-muro";
+        contenedor.innerHTML = `<p id="mensaje" style="color: #888; font-style: italic;">Cargando galería...</p>`;
 
         var scriptAnterior = document.getElementById('gvizScript');
         if (scriptAnterior) {
@@ -273,7 +456,9 @@
       }
 
       function mostrarErrorCarga(detalle) {
-        document.getElementById('contenido').innerHTML = `
+        var contenedor = document.getElementById('contenidoMuro');
+        contenedor.className = "estado-muro";
+        contenedor.innerHTML = `
           <p style="color: #ff6b6b;">No se pudieron cargar los datos (${detalle}).</p>
           <button class="info" onclick="recargarDatos()" style="margin-top: 12px;">🔄 Reintentar</button>
           <button class="accent" onclick="cambiarVista('subir')" style="margin-top: 12px;">➕ Subir mi Foto</button>
@@ -283,18 +468,16 @@
       function mostrarPersona() {
         if (personas.length === 0) return;
         var p = personas[indiceActual];
-        var fileId = extraerIdDrive(p.foto);
-        var urlFoto = fileId
-          ? "https://drive.google.com/thumbnail?id=" + encodeURIComponent(fileId) + "&sz=w1000"
-          : p.foto;
-        
+        var urlFoto = obtenerUrlImagen(p.foto);
+        var nombreSeguro = escaparHtml(p.nombre);
+
         var html = `
-          <img src="${urlFoto}" alt="${p.nombre}" referrerpolicy="no-referrer" onerror="this.style.display='none'; document.getElementById('avisoImg').style.display='block';">
-          <p id="avisoImg" style="display:none; color:#ff9800; font-size:14px;">No se pudo mostrar la imagen de ${p.nombre}.</p>
-          <h2>${p.nombre}</h2>
+          <img class="slide-img" src="${urlFoto}" alt="${nombreSeguro}" referrerpolicy="no-referrer" onerror="this.style.display='none'; document.getElementById('avisoImg').style.display='block';">
+          <p id="avisoImg" style="display:none; color:#ff9800; font-size:14px;">No se pudo mostrar la imagen de ${nombreSeguro}.</p>
+          <h2>${nombreSeguro}</h2>
           <p style="color: #aaa; font-size: 14px;">(${indiceActual + 1} de ${personas.length})</p>
         `;
-        document.getElementById('contenido').innerHTML = html;
+        document.getElementById('contenidoSlide').innerHTML = html;
       }
 
       function siguiente() {
@@ -307,15 +490,6 @@
         if (personas.length === 0) return;
         indiceActual = (indiceActual - 1 + personas.length) % personas.length;
         mostrarPersona();
-      }
-
-      function iniciarAutoPlay() {
-        if (intervaloAuto) clearInterval(intervaloAuto);
-        intervaloAuto = setInterval(function() {
-          if (estaReproduciendo) {
-            siguiente();
-          }
-        }, 4000);
       }
 
       function toggleAuto() {
@@ -331,7 +505,7 @@
       }
 
       function recargarDatos() {
-        cargarDatos(false);
+        cargarDatos();
       }
 
       function enviarFoto() {
@@ -370,11 +544,12 @@
           })
           .then(() => {
             status.style.color = "#4CAF50";
-            status.innerText = "¡Foto enviada! Volviendo al slideshow...";
+            status.innerText = "¡Foto enviada! Volviendo al muro...";
             btn.disabled = false;
             
             setTimeout(function() {
-              cambiarVista('slideshow');
+              cambiarVista('muro');
+              cargarDatos();
             }, 1500);
           })
           .catch(err => {
