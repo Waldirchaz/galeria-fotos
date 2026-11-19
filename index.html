@@ -153,6 +153,8 @@
       let indiceActual = 0;
       let intervaloAuto = null;
       let estaReproduciendo = true;
+      let iniciarSlideshowPendiente = true;
+      let timerCarga = null;
 
       window.onload = function() {
         cargarDatos(true);
@@ -173,42 +175,64 @@
         }
       }
 
+      window.recibirDatosJSONP = function(data) {
+        if (timerCarga) {
+          clearTimeout(timerCarga);
+          timerCarga = null;
+        }
+
+        personas = Array.isArray(data) ? data : [];
+        if (personas.length === 0) {
+          document.getElementById('contenido').innerHTML = `
+            <p id="mensaje" style="color: #888; font-style: italic;">No hay fotos registradas todavía.</p>
+            <button class="accent" onclick="cambiarVista('subir')" style="margin-top: 15px; padding: 12px 24px; font-size: 16px;">➕ Subir la primera foto</button>
+          `;
+          document.getElementById('botonesControles').style.display = 'flex';
+        } else {
+          document.getElementById('botonesControles').style.display = 'flex';
+          if (indiceActual >= personas.length) indiceActual = 0;
+          mostrarPersona();
+
+          if (iniciarSlideshowPendiente) {
+            iniciarAutoPlay();
+          }
+        }
+      };
+
       function cargarDatos(iniciarSlideshow) {
+        iniciarSlideshowPendiente = iniciarSlideshow;
         document.getElementById('contenido').innerHTML = `<p id="mensaje" style="color: #888; font-style: italic;">Cargando galería...</p>`;
 
-        fetch(SCRIPT_URL)
-          .then(response => {
-            if (!response.ok) {
-              throw new Error("Respuesta HTTP " + response.status);
-            }
-            return response.json();
-          })
-          .then(data => {
-            personas = Array.isArray(data) ? data : [];
-            if (personas.length === 0) {
-              document.getElementById('contenido').innerHTML = `
-                <p id="mensaje" style="color: #888; font-style: italic;">No hay fotos registradas todavía.</p>
-                <button class="accent" onclick="cambiarVista('subir')" style="margin-top: 15px; padding: 12px 24px; font-size: 16px;">➕ Subir la primera foto</button>
-              `;
-              document.getElementById('botonesControles').style.display = 'flex';
-            } else {
-              document.getElementById('botonesControles').style.display = 'flex';
-              if (indiceActual >= personas.length) indiceActual = 0;
-              mostrarPersona();
-              
-              if (iniciarSlideshow) {
-                iniciarAutoPlay();
-              }
-            }
-          })
-          .catch(error => {
-            document.getElementById('contenido').innerHTML = `
-              <p style="color: #ff6b6b;">No se pudieron cargar los datos (${error.message}).</p>
-              <button class="info" onclick="recargarDatos()" style="margin-top: 12px;">🔄 Reintentar</button>
-              <button class="accent" onclick="cambiarVista('subir')" style="margin-top: 12px;">➕ Subir mi Foto</button>
-            `;
-            console.error("Error al cargar datos:", error);
-          });
+        var scriptAnterior = document.getElementById('jsonpScript');
+        if (scriptAnterior) {
+          scriptAnterior.remove();
+        }
+
+        if (timerCarga) {
+          clearTimeout(timerCarga);
+        }
+
+        var script = document.createElement('script');
+        script.id = 'jsonpScript';
+        script.src = SCRIPT_URL + (SCRIPT_URL.includes('?') ? '&' : '?') + 'callback=recibirDatosJSONP&_=' + Date.now();
+        script.onerror = function() {
+          if (timerCarga) clearTimeout(timerCarga);
+          mostrarErrorCarga("No se pudo conectar con Google Apps Script.");
+        };
+
+        timerCarga = setTimeout(function() {
+          mostrarErrorCarga("La conexión tardó demasiado en responder.");
+        }, 12000);
+
+        document.body.appendChild(script);
+      }
+
+      function mostrarErrorCarga(detalle) {
+        document.getElementById('contenido').innerHTML = `
+          <p style="color: #ff6b6b;">No se pudieron cargar los datos (${detalle}).</p>
+          <button class="info" onclick="recargarDatos()" style="margin-top: 12px;">🔄 Reintentar</button>
+          <button class="accent" onclick="cambiarVista('subir')" style="margin-top: 12px;">➕ Subir mi Foto</button>
+        `;
       }
 
       function extraerIdDrive(url) {
@@ -311,17 +335,17 @@
 
           fetch(SCRIPT_URL, {
             method: 'POST',
+            mode: 'no-cors',
             body: JSON.stringify(payload)
           })
-          .then(res => res.json())
-          .then(respuesta => {
+          .then(() => {
             status.style.color = "#4CAF50";
-            status.innerText = "¡Foto subida con éxito! Volviendo al slideshow...";
+            status.innerText = "¡Foto enviada! Volviendo al slideshow...";
             btn.disabled = false;
             
             setTimeout(function() {
               cambiarVista('slideshow');
-            }, 1200);
+            }, 1500);
           })
           .catch(err => {
             status.style.color = "#E91E63";
