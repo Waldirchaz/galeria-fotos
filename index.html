@@ -347,16 +347,27 @@
       }
       .custom-video-surface {
         width: 100%;
-        max-height: 46vh;
+        max-height: 44vh;
         min-height: 200px;
         background: #000000;
         display: block;
         object-fit: contain;
       }
+      .custom-drive-frame {
+        width: 100%;
+        height: 44vh;
+        min-height: 210px;
+        border: 0;
+        display: block;
+        background: #000000;
+      }
       @media (min-width: 640px) {
         .custom-video-surface {
-          max-height: 54vh;
+          max-height: 52vh;
           min-height: 280px;
+        }
+        .custom-drive-frame {
+          height: 390px;
         }
       }
       .custom-player-bar {
@@ -415,30 +426,25 @@
       .custom-transport-row {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 8px;
+        justify-content: center;
+        gap: 10px;
       }
-      .custom-transport-left {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .custom-ctrl-btn {
-        padding: 6px 11px;
-        font-size: 12px;
-        font-weight: 600;
+      .custom-icon-btn {
+        width: 36px;
+        height: 32px;
+        padding: 0;
+        font-size: 14px;
+        line-height: 1;
         border-radius: 7px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         background: #27272f;
         border: 1px solid rgba(255, 255, 255, 0.22);
         color: #ffffff;
       }
-      .custom-ctrl-btn:hover {
+      .custom-icon-btn:hover {
         background: #353540;
-      }
-      .custom-video-status {
-        font-size: 11px;
-        color: #a1a1aa;
-        text-align: right;
       }
 
       /* CONTROLES SOBRE LA FOTO (SOLO PARA FOTOS) */
@@ -656,15 +662,15 @@
 
           <div class="controls-sobre-foto" id="botonesControles">
             <div class="controls-row">
-              <button class="btn-compact" onclick="anterior()">❮ Anterior</button>
-              <button id="btnAuto" class="btn-compact" onclick="toggleAuto()">Iniciar Auto-Play</button>
-              <button class="btn-compact" onclick="siguiente()">Siguiente ❯</button>
+              <button class="btn-compact" onclick="anterior()" title="Anterior">❮</button>
+              <button id="btnAuto" class="btn-compact" onclick="toggleAuto()" title="Auto-Play">▶</button>
+              <button class="btn-compact" onclick="siguiente()" title="Siguiente">❯</button>
             </div>
             <div class="controls-row">
-              <button class="btn-compact" onclick="cerrarModales()">🧱 Ver Muro</button>
+              <button class="btn-compact" onclick="cerrarModales()" title="Ver Muro">🧱</button>
               <button id="btnLikeSlide" class="btn-compact" onclick="toggleLikeActual()">♥ 0</button>
-              <button class="btn-compact" onclick="descargarFotoActiva()">⬇ Descargar</button>
-              <button class="btn-compact" onclick="abrirModal('subir')">➕ Añadir al álbum</button>
+              <button class="btn-compact" onclick="descargarFotoActiva()" title="Descargar">⬇</button>
+              <button class="btn-compact" onclick="abrirModal('subir')" title="Añadir al álbum">➕</button>
             </div>
           </div>
         </div>
@@ -768,20 +774,33 @@
         return min + ":" + (rest < 10 ? "0" + rest : rest);
       }
 
+      function cambiarAFrameDrive(fileId) {
+        var vid = document.getElementById("videoPropio");
+        var barra = document.getElementById("barraVideoPropio");
+        var frame = document.getElementById("frameDriveRespaldo");
+        if (!fileId) return;
+        if (vid) vid.style.display = "none";
+        if (barra) barra.style.display = "none";
+        if (frame) {
+          frame.src = "https://drive.google.com/file/d/" + encodeURIComponent(fileId) + "/preview";
+          frame.style.display = "block";
+        }
+      }
+
       function togglePlayVideoPropio() {
         var vid = document.getElementById("videoPropio");
         var btn = document.getElementById("btnPlayPropio");
         if (!vid) return;
         if (vid.paused) {
           vid.play().then(function() {
-            if (btn) btn.innerText = "⏸ Pausa";
+            if (btn) btn.innerText = "⏸";
           }).catch(function() {
-            var st = document.getElementById("estadoVideoPropio");
-            if (st) st.innerText = "No se pudo iniciar el video desde Drive.";
+            var fileId = vid.getAttribute("data-fileid") || "";
+            cambiarAFrameDrive(fileId);
           });
         } else {
           vid.pause();
-          if (btn) btn.innerText = "▶ Play";
+          if (btn) btn.innerText = "▶";
         }
       }
 
@@ -791,7 +810,7 @@
         if (!vid) return;
         vid.muted = !vid.muted;
         if (btn) {
-          btn.innerText = vid.muted ? "🔇 Mute" : "🔊 Sonido";
+          btn.innerText = vid.muted ? "🔇" : "🔊";
         }
       }
 
@@ -828,12 +847,10 @@
         var tActual = document.getElementById("tiempoActualPropio");
         var tTotal = document.getElementById("tiempoTotalPropio");
         var btnPlay = document.getElementById("btnPlayPropio");
-        var st = document.getElementById("estadoVideoPropio");
         if (!vid) return;
 
         vid.addEventListener("loadedmetadata", function() {
           if (tTotal) tTotal.innerText = formatearTiempo(vid.duration);
-          if (st) st.innerText = "Listo";
         });
 
         vid.addEventListener("timeupdate", function() {
@@ -847,23 +864,21 @@
         });
 
         vid.addEventListener("play", function() {
-          if (btnPlay) btnPlay.innerText = "⏸ Pausa";
-          if (st) st.innerText = "Reproduciendo";
+          if (btnPlay) btnPlay.innerText = "⏸";
         });
 
         vid.addEventListener("pause", function() {
-          if (btnPlay) btnPlay.innerText = "▶ Play";
-          if (!vid.ended && st) st.innerText = "Pausado";
+          if (btnPlay) btnPlay.innerText = "▶";
         });
 
         vid.addEventListener("ended", function() {
-          if (btnPlay) btnPlay.innerText = "▶ Play";
+          if (btnPlay) btnPlay.innerText = "▶";
           if (slider) slider.value = 0;
-          if (st) st.innerText = "Finalizado";
         });
 
         vid.addEventListener("error", function() {
-          if (st) st.innerText = "Drive no permitió reproducir este archivo directamente.";
+          var fileId = vid.getAttribute("data-fileid") || "";
+          cambiarAFrameDrive(fileId);
         });
       }
 
@@ -994,10 +1009,10 @@
         var btn = document.getElementById('btnAuto');
         if (!btn) return;
         if (estaReproduciendo) {
-          btn.innerText = "Pausar Auto-Play";
+          btn.innerText = "⏸";
           btn.classList.add('active-autoplay');
         } else {
-          btn.innerText = "Iniciar Auto-Play";
+          btn.innerText = "▶";
           btn.classList.remove('active-autoplay');
         }
       }
@@ -1180,14 +1195,14 @@
         personas.forEach(function(p, idx) {
           var urlFoto = obtenerUrlImagen(p.foto, 800);
           var nombreSeguro = escaparHtml(p.nombre);
-          var videoBadge = esVideo(p) ? `<span class="badge-video">▶ Video</span>` : "";
+          var videoBadge = esVideo(p) ? `<span class="badge-video">▶</span>` : "";
           var totalLikes = obtenerConteoLikes(p, idx);
 
           html += `
             <div class="muro-item" onclick="abrirSlideshowEnFoto(${idx})" title="Ver en slideshow: ${nombreSeguro}">
               <img src="${urlFoto}" alt="${nombreSeguro}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
               <div class="muro-fallback" style="display:none;">
-                <span>${esVideo(p) ? "Video" : "Sin vista previa"}</span>
+                <span>${esVideo(p) ? "▶" : "🖼"}</span>
                 <strong>${nombreSeguro}</strong>
               </div>
               <span class="badge-likes">♥ ${totalLikes}</span>
@@ -1351,19 +1366,17 @@
 
           mediaHtml = `
             <div class="custom-player-shell">
-              <video id="videoPropio" class="custom-video-surface" src="${urlVideoDrive}" poster="${urlPoster}" playsinline preload="metadata"></video>
-              <div class="custom-player-bar">
+              <video id="videoPropio" class="custom-video-surface" data-fileid="${fileId}" src="${urlVideoDrive}" poster="${urlPoster}" playsinline preload="metadata"></video>
+              <iframe id="frameDriveRespaldo" class="custom-drive-frame" style="display:none;" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+              <div id="barraVideoPropio" class="custom-player-bar">
                 <div class="custom-seek-row">
                   <span id="tiempoActualPropio" class="custom-time-label">0:00</span>
                   <input id="sliderVideoPropio" type="range" class="custom-seek-slider" min="0" max="1000" value="0" onmousedown="iniciarArrastreSeek()" ontouchstart="iniciarArrastreSeek()" oninput="moverSeekEnTiempoReal()" onchange="soltarSeekVideo()" aria-label="Barra de avance del video">
                   <span id="tiempoTotalPropio" class="custom-time-label">0:00</span>
                 </div>
                 <div class="custom-transport-row">
-                  <div class="custom-transport-left">
-                    <button id="btnPlayPropio" type="button" class="custom-ctrl-btn" onclick="togglePlayVideoPropio()">▶ Play</button>
-                    <button id="btnMutePropio" type="button" class="custom-ctrl-btn" onclick="toggleMuteVideoPropio()">🔊 Sonido</button>
-                  </div>
-                  <span id="estadoVideoPropio" class="custom-video-status">Cargando...</span>
+                  <button id="btnPlayPropio" type="button" class="custom-icon-btn" onclick="togglePlayVideoPropio()" title="Play / Pausa">▶</button>
+                  <button id="btnMutePropio" type="button" class="custom-icon-btn" onclick="toggleMuteVideoPropio()" title="Sonido / Mute">🔊</button>
                 </div>
               </div>
             </div>
