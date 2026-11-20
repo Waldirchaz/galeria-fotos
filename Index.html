@@ -64,11 +64,11 @@
           rgba(12, 12, 18, 0.55) 55%,
           rgba(12, 12, 18, 0.88) 100%
         );
-        z-index: 0;
+        z-Index: 0;
       }
       .hero-contenido {
         position: relative;
-        z-index: 1;
+        z-Index: 1;
         display: flex;
         flex-direction: column;
         align-items: flex-start;
@@ -78,7 +78,7 @@
         position: absolute;
         top: 14px;
         right: 14px;
-        z-index: 2;
+        z-Index: 2;
         display: flex;
         gap: 8px;
       }
@@ -181,13 +181,13 @@
         text-align: center;
       }
 
-      /* VISTA 2: SLIDESHOW (FONDO NEGRO CON 75% DE TRANSPARENCIA) */
+      /* VISTA 2: SLIDESHOW (FONDO NEGRO CON 50% DE TRANSPARENCIA) */
       #vistaSlideshow {
         position: fixed;
         inset: 0;
-        z-index: 50;
-        background-color: rgba(0, 0, 0, 0.75);
-        backdrop-filter: blur(3px);
+        z-Index: 50;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2px);
         flex-direction: column;
         align-items: center;
         justify-content: center;
@@ -210,6 +210,7 @@
         margin: 8px 0;
         font-size: 24px;
         letter-spacing: 0.5px;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
       }
       .controls {
         margin-top: 18px;
@@ -237,7 +238,7 @@
         text-align: left;
         border: 1px solid #333;
       }
-      .card h2 { text-align: center; color: #fff; font-size: 22px; }
+      .card h2 { text-align: center; color: #fff; font-size: 22px; text-shadow: none; }
       .form-group { margin-bottom: 18px; }
       label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #ccc; }
       input[type="text"], input[type="file"] {
@@ -252,7 +253,7 @@
       }
 
       button {
-        background-color: #1f1f1f;
+        background-color: rgba(31, 31, 31, 0.92);
         color: white;
         border: 1px solid #444;
         padding: 10px 16px;
@@ -264,7 +265,7 @@
       button:hover { background-color: #333; }
       button.primary { background-color: #4CAF50; border: none; }
       button.primary:hover { background-color: #43a047; }
-      button.info { background-color: rgba(2, 136, 209, 0.9); border: none; }
+      button.info { background-color: rgba(2, 136, 209, 0.92); border: none; }
       button.info:hover { background-color: #0277BD; }
       button.album-btn {
         background-color: rgba(24, 24, 27, 0.92);
@@ -319,8 +320,9 @@
         <div class="controls" id="botonesControles">
           <button onclick="cambiarVista('muro')">🧱 Ver Muro</button>
           <button onclick="anterior()">❮ Anterior</button>
-          <button id="btnAuto" class="primary" onclick="toggleAuto()">Pausar Auto-Play</button>
+          <button id="btnAuto" onclick="toggleAuto()">Iniciar Auto-Play</button>
           <button onclick="siguiente()">Siguiente ❯</button>
+          <button class="info" onclick="descargarFotoActiva()">⬇ Descargar</button>
           <button class="album-btn" onclick="cambiarVista('subir')">➕ Añadir al álbum</button>
         </div>
       </div>
@@ -352,12 +354,12 @@
     <script>
       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7AXiZC4ux58UndrfTa8FVYIc8P9_oMWMKAbaEQU9ADaeuXXJzn2LgorRm07PqsYNayA/exec";
       const SHEET_ID = "1tgTEtJEJCwf57mrh04q4kC1tenLF-1KTjvpmDojLWRk";
-      const INTERVALO_SLIDESHOW_MS = 6000; // 2 segundos más lento (6s)
+      const INTERVALO_SLIDESHOW_MS = 7000; // 7 segundos (1 segundo más lento que antes)
 
       let personas = [];
       let indiceActual = 0;
       let intervaloAuto = null;
-      let estaReproduciendo = true;
+      let estaReproduciendo = false; // Inicia apagado hasta pulsar Iniciar Auto-Play
       let timerCarga = null;
 
       window.onload = function() {
@@ -365,6 +367,8 @@
       };
 
       function detenerAutoPlay() {
+        estaReproduciendo = false;
+        actualizarBotonAuto();
         if (intervaloAuto) {
           clearInterval(intervaloAuto);
           intervaloAuto = null;
@@ -372,12 +376,28 @@
       }
 
       function iniciarAutoPlay() {
-        detenerAutoPlay();
+        if (intervaloAuto) {
+          clearInterval(intervaloAuto);
+        }
+        estaReproduciendo = true;
+        actualizarBotonAuto();
         intervaloAuto = setInterval(function() {
           if (estaReproduciendo && document.getElementById('vistaSlideshow').classList.contains('active')) {
             siguiente();
           }
         }, INTERVALO_SLIDESHOW_MS);
+      }
+
+      function actualizarBotonAuto() {
+        var btn = document.getElementById('btnAuto');
+        if (!btn) return;
+        if (estaReproduciendo) {
+          btn.innerText = "Pausar Auto-Play";
+          btn.classList.add('primary');
+        } else {
+          btn.innerText = "Iniciar Auto-Play";
+          btn.classList.remove('primary');
+        }
       }
 
       function cambiarVista(vista) {
@@ -390,9 +410,9 @@
           document.getElementById('vistaMuro').classList.add('active');
           renderizarMuro();
         } else if (vista === 'slideshow') {
+          detenerAutoPlay(); // Se abre sin auto-play hasta que el usuario lo inicie
           document.getElementById('vistaSlideshow').classList.add('active');
           mostrarPersona();
-          iniciarAutoPlay();
         } else if (vista === 'subir') {
           detenerAutoPlay();
           document.getElementById('vistaSubir').classList.add('active');
@@ -514,39 +534,42 @@
           return;
         }
 
-        // En gviz, la fila 0 corresponde a la fila 1 de la hoja (o a la primera fila de datos).
-        // Columna E es el índice 4 (A=0, B=1, C=2, D=3, E=4).
-        var fila0 = resp.table.rows[0];
-        var tituloE1 = obtenerValorCelda(fila0, 4);
-        var fondoE2 = obtenerValorCelda(fila0, 5); // Por si alguien lo pone en E2 como fila 1/col F, revisamos también fila 1 col 4:
-        if (!fondoE2 && resp.table.rows[1]) {
-          fondoE2 = obtenerValorCelda(resp.table.rows[1], 4);
-        }
-        var avatarE3 = resp.table.rows[2] ? obtenerValorCelda(resp.table.rows[2], 4) : "";
+        // Portada: Columna E (índice 4) -> Fila 1 = E1, Fila 2 = E2, Fila 3 = E3
+        var fila1 = resp.table.rows[0];
+        var fila2 = resp.table.rows[1];
+        var fila3 = resp.table.rows[2];
+
+        var tituloE1 = obtenerValorCelda(fila1, 4);
+        var fondoE2 = obtenerValorCelda(fila2, 4);
+        var avatarE3 = obtenerValorCelda(fila3, 4);
 
         aplicarConfiguracionPortada(tituloE1, fondoE2, avatarE3);
 
+        // Galería: Nombre en Columna A (índice 0) y Foto en Columna B (índice 1)
         var lista = [];
         resp.table.rows.forEach(function(filaObj, idx) {
           if (!filaObj || !Array.isArray(filaObj.c)) return;
-          var nombre = "";
+
+          var nombre = obtenerValorCelda(filaObj, 0);
+          var celdaB = obtenerValorCelda(filaObj, 1);
+          var idB = extraerIdDrive(celdaB);
+
           var urlFoto = "";
-
-          filaObj.c.forEach(function(celda, colIdx) {
-            if (!celda || celda.v === null || celda.v === undefined) return;
-            var valor = String(celda.v).trim();
-            var idDetectado = extraerIdDrive(valor);
-
-            if (idDetectado) {
-              urlFoto = "https://drive.google.com/thumbnail?id=" + encodeURIComponent(idDetectado) + "&sz=w1000";
-            } else if (valor !== "" && !valor.startsWith("Date(") && colIdx === 0) {
-              nombre = valor;
-            }
-          });
+          if (idB) {
+            urlFoto = "https://drive.google.com/thumbnail?id=" + encodeURIComponent(idB) + "&sz=w1000";
+          } else if (/^https?:\/\//i.test(celdaB)) {
+            urlFoto = celdaB;
+          }
 
           if (urlFoto !== "") {
-            if (!nombre) nombre = "Invitado " + (idx + 1);
-            lista.push({ nombre: nombre, foto: urlFoto });
+            if (!nombre || nombre.startsWith("Date(")) {
+              nombre = "Invitado " + (idx + 1);
+            }
+            lista.push({
+              nombre: nombre,
+              foto: urlFoto,
+              fileId: idB
+            });
           }
         });
 
@@ -609,9 +632,32 @@
           <img class="slide-img" src="${urlFoto}" alt="${nombreSeguro}" referrerpolicy="no-referrer" onerror="this.style.display='none'; document.getElementById('avisoImg').style.display='block';">
           <p id="avisoImg" style="display:none; color:#ff9800; font-size:14px;">No se pudo mostrar la imagen de ${nombreSeguro}.</p>
           <h2>${nombreSeguro}</h2>
-          <p style="color: #aaa; font-size: 14px;">(${indiceActual + 1} de ${personas.length})</p>
+          <p style="color: #ddd; font-size: 14px;">(${indiceActual + 1} de ${personas.length})</p>
         `;
         document.getElementById('contenidoSlide').innerHTML = html;
+      }
+
+      function descargarFotoActiva() {
+        if (personas.length === 0) return;
+        var p = personas[indiceActual];
+        var fileId = p.fileId || extraerIdDrive(p.foto);
+        var urlDescarga = fileId
+          ? "https://drive.google.com/uc?export=download&id=" + encodeURIComponent(fileId)
+          : p.foto;
+
+        var nombreArchivo = (p.nombre || "foto")
+          .toLowerCase()
+          .replace(/[^a-z0-9-_]+/g, "_")
+          .replace(/^_+|_+$/g, "") || "foto";
+
+        var enlace = document.createElement('a');
+        enlace.href = urlDescarga;
+        enlace.download = nombreArchivo + ".jpg";
+        enlace.target = "_blank";
+        enlace.rel = "noopener";
+        document.body.appendChild(enlace);
+        enlace.click();
+        enlace.remove();
       }
 
       function siguiente() {
@@ -627,14 +673,10 @@
       }
 
       function toggleAuto() {
-        estaReproduciendo = !estaReproduciendo;
-        var btn = document.getElementById('btnAuto');
         if (estaReproduciendo) {
-          btn.innerText = "Pausar Auto-Play";
-          btn.classList.add('primary');
+          detenerAutoPlay();
         } else {
-          btn.innerText = "Reanudar Auto-Play";
-          btn.classList.remove('primary');
+          iniciarAutoPlay();
         }
       }
 
