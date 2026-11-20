@@ -267,7 +267,8 @@
         text-align: center;
       }
       .container {
-        max-width: 96%;
+        width: 100%;
+        max-width: 720px;
         max-height: 94vh;
         display: flex;
         flex-direction: column;
@@ -285,8 +286,18 @@
         max-height: 74vh;
         border-radius: 12px;
         overflow: hidden;
-        background: rgba(18, 18, 22, 0.85);
+        background: rgba(18, 18, 22, 0.9);
         box-shadow: 0 8px 28px rgba(0, 0, 0, 0.75);
+      }
+      .slide-stage.modo-video {
+        width: 100%;
+        max-width: 680px;
+        min-height: 0;
+        max-height: none;
+        overflow: visible;
+        background: transparent;
+        box-shadow: none;
+        gap: 10px;
       }
       .btn-fullscreen-top {
         position: absolute;
@@ -318,59 +329,28 @@
         display: block;
         object-fit: contain;
       }
-      .video-wrapper {
-        position: relative;
-        width: 84vw;
-        min-width: 280px;
-        max-width: 640px;
-        padding: 10px 10px 72px;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      }
-      .video-stage-inner {
+      .video-box-limpio {
         position: relative;
         width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .slide-video-el {
-        width: 100%;
-        max-height: 44vh;
-        border-radius: 10px;
+        border-radius: 12px;
+        overflow: hidden;
         background: #000;
-        display: block;
-      }
-      .btn-center-play {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 6;
-        padding: 9px 15px;
-        font-size: 14px;
-        font-weight: 700;
-        border-radius: 999px;
-        background-color: rgba(24, 24, 28, 0.82);
-        border: 1px solid rgba(255, 255, 255, 0.35);
-        opacity: 0.9;
-      }
-      .btn-center-play:hover {
-        opacity: 1;
-        background-color: rgba(42, 42, 48, 0.96);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.75);
       }
       .slide-video-frame {
         width: 100%;
-        height: 260px;
+        height: 360px;
         border: 0;
-        border-radius: 10px;
+        display: block;
         background: #000;
       }
+      @media (min-width: 640px) {
+        .slide-video-frame {
+          height: 420px;
+        }
+      }
 
-      /* CONTROLES SOBRE LA FOTO (2 FILAS, MISMO TAMAÑO Y ESTILO, LIGERAMENTE TRANSPARENTES) */
+      /* CONTROLES SOBRE LA FOTO (SOLO PARA FOTOS) */
       .controls-sobre-foto {
         position: absolute;
         left: 6px;
@@ -383,6 +363,22 @@
         gap: 5px;
         max-width: calc(100% - 12px);
       }
+
+      /* CONTROLES FUERA DEL VIDEO (DEBAJO DEL REPRODUCTOR, SOLO PARA VIDEOS) */
+      .slide-stage.modo-video .controls-sobre-foto,
+      .controls-debajo-video {
+        position: static;
+        left: auto;
+        right: auto;
+        bottom: auto;
+        max-width: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+      }
+
       .controls-row {
         display: flex;
         gap: 5px;
@@ -390,24 +386,29 @@
         align-items: center;
         flex-wrap: wrap;
       }
-      .controls-sobre-foto button {
-        background-color: rgba(24, 24, 28, 0.72);
+      .controls-sobre-foto button,
+      .controls-debajo-video button {
+        background-color: rgba(24, 24, 28, 0.78);
         color: #ffffff;
         border: 1px solid rgba(255, 255, 255, 0.25);
-        opacity: 0.85;
+        opacity: 0.9;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
       }
       .controls-sobre-foto button:hover,
-      .controls-sobre-foto button:focus {
-        background-color: rgba(42, 42, 48, 0.9);
+      .controls-sobre-foto button:focus,
+      .controls-debajo-video button:hover,
+      .controls-debajo-video button:focus {
+        background-color: rgba(42, 42, 48, 0.95);
         opacity: 1;
       }
-      .controls-sobre-foto button.active-autoplay {
-        background-color: rgba(76, 175, 80, 0.78);
+      .controls-sobre-foto button.active-autoplay,
+      .controls-debajo-video button.active-autoplay {
+        background-color: rgba(76, 175, 80, 0.85);
         border-color: rgba(255, 255, 255, 0.35);
       }
-      .controls-sobre-foto button.liked-btn {
-        background-color: rgba(225, 29, 72, 0.82);
+      .controls-sobre-foto button.liked-btn,
+      .controls-debajo-video button.liked-btn {
+        background-color: rgba(225, 29, 72, 0.88);
         border-color: rgba(255, 255, 255, 0.4);
       }
 
@@ -560,8 +561,7 @@
     <div id="vistaSlideshow" class="overlay-modal" onclick="cerrarSiFondo(event, 'vistaSlideshow')">
       <div class="container">
         <div id="slideStage" class="slide-stage">
-          <button id="btnFullscreen" class="btn-fullscreen-top" onclick="toggleFullscreenSlideshow()" title="Pantalla completa">⛶</button>
-          <div id="contenidoSlide"></div>
+          <div id="contenidoSlide" style="width: 100%; display: flex; justify-content: center; position: relative;"></div>
 
           <div class="controls-sobre-foto" id="botonesControles">
             <div class="controls-row">
@@ -1092,47 +1092,46 @@
         `;
       }
 
-      function toggleCentroVideo() {
-        var vid = document.getElementById('videoReproductor');
-        var btn = document.getElementById('btnCentroPlay');
-        if (!vid) return;
-        if (vid.paused) {
-          vid.play().then(function() {
-            if (btn) btn.innerText = "⏸";
-          }).catch(function() {});
-        } else {
-          vid.pause();
-          if (btn) btn.innerText = "▶";
-        }
-      }
-
       function mostrarPersona() {
         if (personas.length === 0) return;
         var p = personas[indiceActual];
         var nombreSeguro = escaparHtml(p.nombre);
         var fileId = p.fileId || extraerIdDrive(p.urlOriginal || p.foto);
+        var stageEl = document.getElementById('slideStage');
+        var controlesEl = document.getElementById('botonesControles');
+        var videoModo = esVideo(p);
         var mediaHtml = "";
 
-        if (esVideo(p)) {
-          var urlStream = fileId
-            ? "https://drive.google.com/uc?export=download&id=" + encodeURIComponent(fileId)
-            : (p.urlOriginal || p.foto);
-          var urlPreview = obtenerUrlVideoDrive(fileId, p.urlOriginal || p.foto);
+        if (stageEl) {
+          if (videoModo) {
+            stageEl.classList.add('modo-video');
+          } else {
+            stageEl.classList.remove('modo-video');
+          }
+        }
 
+        if (controlesEl) {
+          if (videoModo) {
+            controlesEl.classList.remove('controls-sobre-foto');
+            controlesEl.classList.add('controls-debajo-video');
+          } else {
+            controlesEl.classList.remove('controls-debajo-video');
+            controlesEl.classList.add('controls-sobre-foto');
+          }
+        }
+
+        if (videoModo) {
+          var urlPreview = obtenerUrlVideoDrive(fileId, p.urlOriginal || p.foto);
           mediaHtml = `
-            <div class="video-wrapper">
-              <div id="videoDirectoBox" class="video-stage-inner">
-                <video id="videoReproductor" class="slide-video-el" src="${urlStream}" autoplay muted playsinline controls onloadedmetadata="this.play().catch(function(){ var b=document.getElementById('btnCentroPlay'); if(b) b.innerText='▶'; });" onplay="var b=document.getElementById('btnCentroPlay'); if(b) b.innerText='⏸';" onpause="var b=document.getElementById('btnCentroPlay'); if(b) b.innerText='▶';" onerror="document.getElementById('videoDirectoBox').style.display='none'; document.getElementById('videoIframeBox').style.display='block';"></video>
-                <button id="btnCentroPlay" type="button" class="btn-center-play" onclick="toggleCentroVideo()" title="Play / Pausa">⏸</button>
-              </div>
-              <div id="videoIframeBox" style="display:none; width:100%;">
-                <iframe class="slide-video-frame" src="${urlPreview}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
-              </div>
+            <div class="video-box-limpio">
+              <button id="btnFullscreen" class="btn-fullscreen-top" onclick="toggleFullscreenSlideshow()" title="Pantalla completa">⛶</button>
+              <iframe class="slide-video-frame" src="${urlPreview}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
             </div>
           `;
         } else {
           var urlFoto = obtenerUrlImagen(p.foto, 1200);
           mediaHtml = `
+            <button id="btnFullscreen" class="btn-fullscreen-top" onclick="toggleFullscreenSlideshow()" title="Pantalla completa">⛶</button>
             <img class="slide-img" src="${urlFoto}" alt="${nombreSeguro}" referrerpolicy="no-referrer" onerror="this.style.display='none'; document.getElementById('avisoImg').style.display='block';">
             <p id="avisoImg" style="display:none; color:#ff9800; font-size:14px;">No se pudo mostrar la imagen de ${nombreSeguro}.</p>
           `;
