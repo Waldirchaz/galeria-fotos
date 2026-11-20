@@ -252,7 +252,7 @@
       }
       .overlay-modal.modo-video-modal {
         justify-content: flex-start;
-        padding-top: 18px;
+        padding-top: 16px;
         padding-bottom: 24px;
       }
       .overlay-modal.pseudo-fullscreen {
@@ -338,25 +338,36 @@
         width: 100%;
         border-radius: 12px;
         overflow: hidden;
-        background: #18181c;
+        background: #0f0f13;
         border: 1px solid rgba(255, 255, 255, 0.14);
         box-shadow: 0 8px 28px rgba(0, 0, 0, 0.75);
       }
+      .slide-video-native {
+        width: 100%;
+        max-height: 54vh;
+        display: block;
+        background: #000;
+      }
       .slide-video-frame {
         width: 100%;
-        height: 46vh;
-        min-height: 220px;
-        max-height: 360px;
+        height: 340px;
         border: 0;
         display: block;
-        background: #18181c;
+        background: #0f0f13;
       }
       @media (min-width: 640px) {
-        .slide-video-frame {
-          height: 420px;
-          min-height: 360px;
-          max-height: 460px;
+        .slide-video-native {
+          max-height: 62vh;
         }
+        .slide-video-frame {
+          height: 400px;
+        }
+      }
+      .video-nota-drive {
+        padding: 12px;
+        text-align: center;
+        font-size: 13px;
+        color: #ddd;
       }
 
       /* CONTROLES SOBRE LA FOTO (SOLO PARA FOTOS) */
@@ -648,10 +659,10 @@
       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7AXiZC4ux58UndrfTa8FVYIc8P9_oMWMKAbaEQU9ADaeuXXJzn2LgorRm07PqsYNayA/exec";
       const SHEET_ID = "1tgTEtJEJCwf57mrh04q4kC1tenLF-1KTjvpmDojLWRk";
       const INTERVALO_SLIDESHOW_MS = 7000;
-      const STORAGE_LIKES_KEY = "galeria_likes_" + SHEET_ID;
+      const STORAGE_LIKES_KEY = "galeria_likes_voto_" + SHEET_ID;
 
       let personas = [];
-      let likesMapa = cargarLikesGuardados();
+      let votosLocales = cargarVotosLocales();
       let carpetaDestinoE4 = "";
       let tituloActualGaleria = "Galería";
       let indiceActual = 0;
@@ -666,7 +677,7 @@
 
       window.addEventListener("scroll", actualizarVisibilidadSubirArriba, { passive: true });
 
-      function cargarLikesGuardados() {
+      function cargarVotosLocales() {
         try {
           var raw = localStorage.getItem(STORAGE_LIKES_KEY);
           return raw ? JSON.parse(raw) : {};
@@ -675,9 +686,9 @@
         }
       }
 
-      function guardarLikes() {
+      function guardarVotosLocales() {
         try {
-          localStorage.setItem(STORAGE_LIKES_KEY, JSON.stringify(likesMapa));
+          localStorage.setItem(STORAGE_LIKES_KEY, JSON.stringify(votosLocales));
         } catch (e) {}
       }
 
@@ -687,17 +698,13 @@
       }
 
       function obtenerConteoLikes(item, idx) {
-        var clave = obtenerClaveItem(item, idx);
-        var entry = likesMapa[clave];
-        if (!entry) return 0;
-        if (typeof entry === "number") return entry;
-        return entry.count || 0;
+        if (!item) return 0;
+        return Number(item.likes || 0);
       }
 
       function usuarioDioLike(item, idx) {
         var clave = obtenerClaveItem(item, idx);
-        var entry = likesMapa[clave];
-        return !!(entry && typeof entry === "object" && entry.liked);
+        return !!votosLocales[clave];
       }
 
       function actualizarBotonLikeSlide() {
@@ -718,20 +725,13 @@
         if (personas.length === 0) return;
         var p = personas[indiceActual];
         var clave = obtenerClaveItem(p, indiceActual);
-        var actual = likesMapa[clave];
-        var count = (actual && typeof actual === "object") ? (actual.count || 0) : (typeof actual === "number" ? actual : 0);
-        var liked = !!(actual && typeof actual === "object" && actual.liked);
+        var yaDioLike = !!votosLocales[clave];
+        var delta = yaDioLike ? -1 : 1;
 
-        if (liked) {
-          count = Math.max(0, count - 1);
-          liked = false;
-        } else {
-          count = count + 1;
-          liked = true;
-        }
+        votosLocales[clave] = !yaDioLike;
+        guardarVotosLocales();
 
-        likesMapa[clave] = { count: count, liked: liked };
-        guardarLikes();
+        p.likes = Math.max(0, (Number(p.likes) || 0) + delta);
         actualizarBotonLikeSlide();
         renderizarMuro();
 
@@ -740,11 +740,19 @@
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             accion: "registrar_like",
-            nombre: p.nombre,
             fileId: p.fileId || "",
-            totalLikes: count
+            delta: delta
           })
-        }).catch(function() {});
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+          if (res && res.status === "success" && typeof res.totalLikes === "number") {
+            p.likes = res.totalLikes;
+            actualizarBotonLikeSlide();
+            renderizarMuro();
+          }
+        })
+        .catch(function() {});
       }
 
       function aplicarDominioCorreo(dominio) {
@@ -915,17 +923,10 @@
           : fotoOriginal;
       }
 
-      function obtenerUrlVideoDrive(fileId, fallbackUrl) {
-        if (fileId) {
-          return "https://drive.google.com/file/d/" + encodeURIComponent(fileId) + "/preview";
-        }
-        return fallbackUrl;
-      }
-
       function esVideo(item) {
         if (!item) return false;
         var texto = ((item.nombre || "") + " " + (item.urlOriginal || "") + " " + (item.foto || "")).toLowerCase();
-        return /\.(mp4|mov|webm|m4v|avi|3gp)(\?|$|#)/i.test(texto) || texto.includes("video") || texto.includes("/preview");
+        return /\.(mp4|mov|webm|m4v|avi|3gp)(\?|$|#)/i.test(texto) || texto.includes("#video") || texto.includes("/preview");
       }
 
       function escaparHtml(texto) {
@@ -1034,6 +1035,8 @@
 
           var nombre = obtenerValorCelda(filaObj, 0);
           var celdaB = obtenerValorCelda(filaObj, 1);
+          var likesRaw = obtenerValorCelda(filaObj, 5);
+          var likesNum = Number(likesRaw) || 0;
           var idB = extraerIdDrive(celdaB);
 
           var urlFoto = "";
@@ -1051,7 +1054,8 @@
               nombre: nombre,
               foto: urlFoto,
               urlOriginal: celdaB,
-              fileId: idB
+              fileId: idB,
+              likes: likesNum
             });
           }
         });
@@ -1105,6 +1109,15 @@
         `;
       }
 
+      function activarRespaldoDrive(fileId) {
+        var wrap = document.getElementById('videoRespaldoDrive');
+        if (!wrap || !fileId) return;
+        wrap.innerHTML = `
+          <iframe class="slide-video-frame" src="https://drive.google.com/file/d/${encodeURIComponent(fileId)}/preview" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+        `;
+        wrap.style.display = "block";
+      }
+
       function mostrarPersona() {
         if (personas.length === 0) return;
         var p = personas[indiceActual];
@@ -1144,11 +1157,22 @@
         }
 
         if (videoModo) {
-          var urlPreview = obtenerUrlVideoDrive(fileId, p.urlOriginal || p.foto);
+          var urlStream = fileId
+            ? "https://drive.google.com/uc?export=download&id=" + encodeURIComponent(fileId)
+            : (p.urlOriginal || p.foto);
+          var urlDriveView = fileId
+            ? "https://drive.google.com/file/d/" + encodeURIComponent(fileId) + "/view"
+            : urlStream;
+
           mediaHtml = `
             <div class="video-box-limpio">
-              <button id="btnFullscreen" class="btn-fullscreen-top" onclick="toggleFullscreenSlideshow()" title="Pantalla completa">⛶</button>
-              <iframe class="slide-video-frame" src="${urlPreview}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+              <video id="videoNat" class="slide-video-native" src="${urlStream}" controls playsinline preload="metadata" onerror="this.style.display='none'; document.getElementById('videoAlternoBox').style.display='block';"></video>
+              <div id="videoAlternoBox" style="display:none;" class="video-nota-drive">
+                <p style="margin:0 0 8px;">Este formato de video no se puede reproducir directo aquí.</p>
+                <button type="button" class="btn-compact" onclick="activarRespaldoDrive('${fileId}')">▶ Reproductor Drive</button>
+                <a href="${urlDriveView}" target="_blank" rel="noopener" style="margin-left:8px; color:#38bdf8; font-size:12px;">Abrir en Drive ↗</a>
+              </div>
+              <div id="videoRespaldoDrive" style="display:none;"></div>
             </div>
           `;
         } else {
