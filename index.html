@@ -347,7 +347,7 @@
       }
       .custom-video-surface {
         width: 100%;
-        max-height: 44vh;
+        max-height: 46vh;
         min-height: 200px;
         background: #000000;
         display: block;
@@ -363,7 +363,7 @@
       }
       @media (min-width: 640px) {
         .custom-video-surface {
-          max-height: 52vh;
+          max-height: 54vh;
           min-height: 280px;
         }
         .custom-drive-frame {
@@ -429,11 +429,11 @@
         justify-content: center;
         gap: 10px;
       }
-      .custom-icon-btn {
+      .custom-ctrl-btn {
         width: 36px;
         height: 32px;
         padding: 0;
-        font-size: 14px;
+        font-size: 13px;
         line-height: 1;
         border-radius: 7px;
         display: inline-flex;
@@ -443,7 +443,7 @@
         border: 1px solid rgba(255, 255, 255, 0.22);
         color: #ffffff;
       }
-      .custom-icon-btn:hover {
+      .custom-ctrl-btn:hover {
         background: #353540;
       }
 
@@ -662,15 +662,15 @@
 
           <div class="controls-sobre-foto" id="botonesControles">
             <div class="controls-row">
-              <button class="btn-compact" onclick="anterior()" title="Anterior">❮</button>
-              <button id="btnAuto" class="btn-compact" onclick="toggleAuto()" title="Auto-Play">▶</button>
-              <button class="btn-compact" onclick="siguiente()" title="Siguiente">❯</button>
+              <button class="btn-compact" onclick="anterior()">❮ Anterior</button>
+              <button id="btnAuto" class="btn-compact" onclick="toggleAuto()">Iniciar Auto-Play</button>
+              <button class="btn-compact" onclick="siguiente()">Siguiente ❯</button>
             </div>
             <div class="controls-row">
-              <button class="btn-compact" onclick="cerrarModales()" title="Ver Muro">🧱</button>
+              <button class="btn-compact" onclick="cerrarModales()">🧱 Ver Muro</button>
               <button id="btnLikeSlide" class="btn-compact" onclick="toggleLikeActual()">♥ 0</button>
-              <button class="btn-compact" onclick="descargarFotoActiva()" title="Descargar">⬇</button>
-              <button class="btn-compact" onclick="abrirModal('subir')" title="Añadir al álbum">➕</button>
+              <button class="btn-compact" onclick="descargarFotoActiva()">⬇ Descargar</button>
+              <button class="btn-compact" onclick="abrirModal('subir')">➕ Añadir al álbum</button>
             </div>
           </div>
         </div>
@@ -1009,10 +1009,10 @@
         var btn = document.getElementById('btnAuto');
         if (!btn) return;
         if (estaReproduciendo) {
-          btn.innerText = "⏸";
+          btn.innerText = "Pausar Auto-Play";
           btn.classList.add('active-autoplay');
         } else {
-          btn.innerText = "▶";
+          btn.innerText = "Iniciar Auto-Play";
           btn.classList.remove('active-autoplay');
         }
       }
@@ -1195,14 +1195,14 @@
         personas.forEach(function(p, idx) {
           var urlFoto = obtenerUrlImagen(p.foto, 800);
           var nombreSeguro = escaparHtml(p.nombre);
-          var videoBadge = esVideo(p) ? `<span class="badge-video">▶</span>` : "";
+          var videoBadge = esVideo(p) ? `<span class="badge-video">▶ Video</span>` : "";
           var totalLikes = obtenerConteoLikes(p, idx);
 
           html += `
             <div class="muro-item" onclick="abrirSlideshowEnFoto(${idx})" title="Ver en slideshow: ${nombreSeguro}">
               <img src="${urlFoto}" alt="${nombreSeguro}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
               <div class="muro-fallback" style="display:none;">
-                <span>${esVideo(p) ? "▶" : "🖼"}</span>
+                <span>${esVideo(p) ? "Video" : "Sin vista previa"}</span>
                 <strong>${nombreSeguro}</strong>
               </div>
               <span class="badge-likes">♥ ${totalLikes}</span>
@@ -1375,8 +1375,8 @@
                   <span id="tiempoTotalPropio" class="custom-time-label">0:00</span>
                 </div>
                 <div class="custom-transport-row">
-                  <button id="btnPlayPropio" type="button" class="custom-icon-btn" onclick="togglePlayVideoPropio()" title="Play / Pausa">▶</button>
-                  <button id="btnMutePropio" type="button" class="custom-icon-btn" onclick="toggleMuteVideoPropio()" title="Sonido / Mute">🔊</button>
+                  <button id="btnPlayPropio" type="button" class="custom-ctrl-btn" onclick="togglePlayVideoPropio()">▶</button>
+                  <button id="btnMutePropio" type="button" class="custom-ctrl-btn" onclick="toggleMuteVideoPropio()">🔊</button>
                 </div>
               </div>
             </div>
