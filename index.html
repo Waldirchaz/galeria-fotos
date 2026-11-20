@@ -150,8 +150,7 @@
         transform: scale(1.015);
         border-color: #555;
       }
-      .muro-item img,
-      .muro-item video {
+      .muro-item img {
         width: 100%;
         height: 100%;
         object-fit: cover;
@@ -333,7 +332,7 @@
         object-fit: contain;
       }
 
-      /* REPRODUCTOR PROPIO DE VIDEO (VENTANA AMPLIA PARA CELULAR Y ESCRITORIO) */
+      /* REPRODUCTOR DE VIDEO (PREVIEW DE DRIVE AJUSTADO) */
       .custom-player-shell {
         width: 100%;
         border-radius: 12px;
@@ -343,15 +342,6 @@
         box-shadow: 0 8px 28px rgba(0, 0, 0, 0.78);
         display: flex;
         flex-direction: column;
-      }
-      .custom-video-surface {
-        width: 100%;
-        height: 54vh;
-        min-height: 270px;
-        max-height: 68vh;
-        background: #000000;
-        display: block;
-        object-fit: contain;
       }
       .custom-drive-frame {
         width: 100%;
@@ -363,92 +353,11 @@
         background: #000000;
       }
       @media (min-width: 640px) {
-        .custom-video-surface {
-          height: 58vh;
-          min-height: 380px;
-          max-height: 66vh;
-        }
         .custom-drive-frame {
           height: 60vh;
           min-height: 440px;
           max-height: 70vh;
         }
-      }
-      .custom-player-bar {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding: 10px 12px;
-        background: #17171c;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-      }
-      .custom-seek-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        width: 100%;
-      }
-      .custom-time-label {
-        font-size: 11px;
-        color: #d4d4d8;
-        font-variant-numeric: tabular-nums;
-        min-width: 34px;
-        text-align: center;
-      }
-      input[type="range"].custom-seek-slider {
-        -webkit-appearance: none;
-        appearance: none;
-        flex: 1;
-        height: 6px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.22);
-        outline: none;
-        cursor: pointer;
-        margin: 0;
-        padding: 0;
-      }
-      input[type="range"].custom-seek-slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: #4CAF50;
-        border: 2px solid #ffffff;
-        cursor: pointer;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
-      }
-      input[type="range"].custom-seek-slider::-moz-range-thumb {
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: #4CAF50;
-        border: 2px solid #ffffff;
-        cursor: pointer;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
-      }
-      .custom-transport-row {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-      }
-      .custom-ctrl-btn {
-        width: 36px;
-        height: 32px;
-        padding: 0;
-        font-size: 13px;
-        line-height: 1;
-        border-radius: 7px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: #27272f;
-        border: 1px solid rgba(255, 255, 255, 0.22);
-        color: #ffffff;
-      }
-      .custom-ctrl-btn:hover {
-        background: #353540;
       }
 
       /* CONTROLES SOBRE LA FOTO (SOLO PARA FOTOS) */
@@ -602,8 +511,6 @@
       button:hover { background-color: rgba(50, 50, 58, 0.94); }
       button.primary { background-color: rgba(76, 175, 80, 0.85); border: none; }
       button.primary:hover { background-color: rgba(67, 160, 71, 0.98); }
-      button.info { background-color: rgba(2, 136, 209, 0.85); border: none; }
-      button.info:hover { background-color: rgba(2, 119, 189, 0.98); }
       button.album-btn {
         background-color: rgba(24, 24, 27, 0.85);
         border: 1px solid rgba(255, 255, 255, 0.26);
@@ -638,14 +545,14 @@
     <div id="vistaMuro">
       <div id="heroPortada" class="hero-portada">
         <div class="hero-top-bar">
-          <button class="btn-compact" onclick="recargarDatos()">Actualizar</button>
-          <button class="btn-compact" onclick="abrirModal('descargar')">Descargar todo</button>
+          <button type="button" class="btn-compact" onclick="recargarDatos()">Actualizar</button>
+          <button type="button" class="btn-compact" onclick="abrirModal('descargar')">Descargar todo</button>
         </div>
 
         <div class="hero-contenido">
           <img id="heroAvatar" class="hero-avatar" src="" alt="Foto de portada" style="display:none;" referrerpolicy="no-referrer" onerror="this.style.display='none';">
           <h1 id="heroTitulo" class="hero-titulo">Galería</h1>
-          <button class="album-btn" onclick="abrirModal('subir')">➕ Añadir al álbum</button>
+          <button type="button" class="album-btn" onclick="abrirModal('subir')">➕ Añadir al álbum</button>
         </div>
       </div>
 
@@ -656,7 +563,7 @@
       </div>
     </div>
 
-    <button id="btnSubirArriba" class="btn-subir-arriba" onclick="subirArriba()" title="Ir arriba">↑</button>
+    <button type="button" id="btnSubirArriba" class="btn-subir-arriba" onclick="subirArriba()" title="Ir arriba">↑</button>
 
     <!-- VISTA 2: SLIDESHOW SOBRE EL MURO -->
     <div id="vistaSlideshow" class="overlay-modal" onclick="cerrarSiFondo(event, 'vistaSlideshow')">
@@ -666,15 +573,15 @@
 
           <div class="controls-sobre-foto" id="botonesControles">
             <div class="controls-row">
-              <button class="btn-compact" onclick="anterior()">❮ Anterior</button>
-              <button id="btnAuto" class="btn-compact" onclick="toggleAuto()">Iniciar Auto-Play</button>
-              <button class="btn-compact" onclick="siguiente()">Siguiente ❯</button>
+              <button type="button" class="btn-compact" onclick="anterior()">❮ Anterior</button>
+              <button type="button" id="btnAuto" class="btn-compact" onclick="toggleAuto()">Iniciar Auto-Play</button>
+              <button type="button" class="btn-compact" onclick="siguiente()">Siguiente ❯</button>
             </div>
             <div class="controls-row">
-              <button class="btn-compact" onclick="cerrarModales()">🧱 Ver Muro</button>
-              <button id="btnLikeSlide" class="btn-compact" onclick="toggleLikeActual()">♥ 0</button>
-              <button class="btn-compact" onclick="descargarFotoActiva()">⬇ Descargar</button>
-              <button class="btn-compact" onclick="abrirModal('subir')">➕ Añadir al álbum</button>
+              <button type="button" class="btn-compact" onclick="cerrarModales()">🧱 Ver Muro</button>
+              <button type="button" id="btnLikeSlide" class="btn-compact" onclick="toggleLikeActual()">♥ 0</button>
+              <button type="button" class="btn-compact" onclick="descargarFotoActiva()">⬇ Descargar</button>
+              <button type="button" class="btn-compact" onclick="abrirModal('subir')">➕ Añadir al álbum</button>
             </div>
           </div>
         </div>
@@ -688,7 +595,7 @@
       <div class="card">
         <h2>Sube tu Fotografía o Video</h2>
         <p style="color: #bbb; font-size: 13px; margin-bottom: 20px; text-align: center;">Escribe tu nombre y elige una o varias fotos o videos.</p>
-        
+
         <div class="form-group">
           <label for="nombreInput">Tu Nombre:</label>
           <input type="text" id="nombreInput" placeholder="Ej. María Pérez" required>
@@ -700,9 +607,9 @@
           <span class="ayuda-multi">Puedes seleccionar una o varias fotos o videos a la vez.</span>
         </div>
 
-        <button class="primary" style="width:100%; padding: 12px; margin-bottom: 10px;" id="subirBtn" onclick="enviarFotos()">Subir y Ver Muro</button>
-        <button style="width:100%; background: rgba(68, 68, 76, 0.9); border:none; padding: 10px;" onclick="cerrarModales()">Volver al Muro</button>
-        
+        <button type="button" class="primary" style="width:100%; padding: 12px; margin-bottom: 10px;" id="subirBtn" onclick="enviarFotos()">Subir y Ver Muro</button>
+        <button type="button" style="width:100%; background: rgba(68, 68, 76, 0.9); border:none; padding: 10px;" onclick="cerrarModales()">Volver al Muro</button>
+
         <div id="progresoBox" class="progreso-box">
           <div id="progresoBarra" class="progreso-barra"></div>
         </div>
@@ -729,8 +636,8 @@
           </div>
         </div>
 
-        <button class="primary" style="width:100%; padding: 12px; margin-bottom: 10px;" id="enviarZipBtn" onclick="solicitarZipPorCorreo()">Enviar enlace a mi correo</button>
-        <button style="width:100%; background: rgba(68, 68, 76, 0.9); border:none; padding: 10px;" onclick="cerrarModales()">Cancelar</button>
+        <button type="button" class="primary" style="width:100%; padding: 12px; margin-bottom: 10px;" id="enviarZipBtn" onclick="solicitarZipPorCorreo()">Enviar enlace a mi correo</button>
+        <button type="button" style="width:100%; background: rgba(68, 68, 76, 0.9); border:none; padding: 10px;" onclick="cerrarModales()">Cancelar</button>
 
         <div id="statusZip"></div>
       </div>
@@ -750,8 +657,6 @@
       let intervaloAuto = null;
       let estaReproduciendo = false;
       let timerCarga = null;
-      let arrastrandoBarra = false;
-      let timerMetadataMov = null;
 
       window.onload = function() {
         cargarDatos();
@@ -761,190 +666,18 @@
       window.addEventListener("scroll", actualizarVisibilidadSubirArriba, { passive: true });
 
       function destruirVideoActivo() {
-        if (timerMetadataMov) {
-          clearTimeout(timerMetadataMov);
-          timerMetadataMov = null;
-        }
-        var vid = document.getElementById("videoPropio");
-        if (vid) {
-          try {
-            vid.pause();
-            vid.removeAttribute("src");
-            vid.load();
-          } catch (e) {}
-        }
         var frame = document.getElementById("frameDriveRespaldo");
         if (frame) {
           try {
+            frame.src = "about:blank";
             frame.removeAttribute("src");
           } catch (e) {}
         }
       }
 
-      function formatearTiempo(seg) {
-        if (!isFinite(seg) || seg < 0) return "0:00";
-        var total = Math.floor(seg);
-        var min = Math.floor(total / 60);
-        var rest = total % 60;
-        return min + ":" + (rest < 10 ? "0" + rest : rest);
-      }
-
       function obtenerUrlDirectaDrive(fileId) {
         if (!fileId) return "";
         return "https://drive.usercontent.google.com/download?id=" + encodeURIComponent(fileId) + "&export=download&confirm=t";
-      }
-
-      function esArchivoMov(item) {
-        if (!item) return false;
-        var texto = ((item.nombre || "") + " " + (item.urlOriginal || "") + " " + (item.foto || "")).toLowerCase();
-        return /\.mov(\?|$|#)/i.test(texto) || texto.includes("quicktime");
-      }
-
-      function cambiarAFrameDrive(fileId) {
-        if (timerMetadataMov) {
-          clearTimeout(timerMetadataMov);
-          timerMetadataMov = null;
-        }
-        var vid = document.getElementById("videoPropio");
-        var barra = document.getElementById("barraVideoPropio");
-        var frame = document.getElementById("frameDriveRespaldo");
-        if (!fileId) return;
-        if (vid) {
-          try { vid.pause(); } catch (e) {}
-          vid.style.display = "none";
-        }
-        if (barra) barra.style.display = "none";
-        if (frame) {
-          frame.src = "https://drive.google.com/file/d/" + encodeURIComponent(fileId) + "/preview";
-          frame.style.display = "block";
-        }
-      }
-
-      function togglePlayVideoPropio() {
-        var vid = document.getElementById("videoPropio");
-        var btn = document.getElementById("btnPlayPropio");
-        if (!vid) return;
-        if (vid.paused) {
-          vid.play().then(function() {
-            if (btn) btn.innerText = "⏸";
-          }).catch(function() {
-            var fileId = vid.getAttribute("data-fileid") || "";
-            cambiarAFrameDrive(fileId);
-          });
-        } else {
-          vid.pause();
-          if (btn) btn.innerText = "▶";
-        }
-      }
-
-      function toggleMuteVideoPropio() {
-        var vid = document.getElementById("videoPropio");
-        var btn = document.getElementById("btnMutePropio");
-        if (!vid) return;
-        vid.muted = !vid.muted;
-        if (btn) {
-          btn.innerText = vid.muted ? "🔇" : "🔊";
-        }
-      }
-
-      function iniciarArrastreSeek() {
-        arrastrandoBarra = true;
-      }
-
-      function moverSeekEnTiempoReal() {
-        var vid = document.getElementById("videoPropio");
-        var slider = document.getElementById("sliderVideoPropio");
-        var tActual = document.getElementById("tiempoActualPropio");
-        if (!vid || !slider) return;
-        var dur = vid.duration || 0;
-        if (dur > 0) {
-          var nuevoTiempo = (Number(slider.value) / 1000) * dur;
-          if (tActual) tActual.innerText = formatearTiempo(nuevoTiempo);
-        }
-      }
-
-      function soltarSeekVideo() {
-        var vid = document.getElementById("videoPropio");
-        var slider = document.getElementById("sliderVideoPropio");
-        arrastrandoBarra = false;
-        if (!vid || !slider) return;
-        var dur = vid.duration || 0;
-        if (dur > 0) {
-          vid.currentTime = (Number(slider.value) / 1000) * dur;
-        }
-      }
-
-      function inicializarEventosVideoPropio(esMov) {
-        var vid = document.getElementById("videoPropio");
-        var slider = document.getElementById("sliderVideoPropio");
-        var tActual = document.getElementById("tiempoActualPropio");
-        var tTotal = document.getElementById("tiempoTotalPropio");
-        var btnPlay = document.getElementById("btnPlayPropio");
-        if (!vid) return;
-
-        var contadorErrores = 0;
-        var metadataCargada = false;
-        var fileId = vid.getAttribute("data-fileid") || "";
-        var urlDirecta = vid.getAttribute("data-url") || "";
-
-        if (timerMetadataMov) {
-          clearTimeout(timerMetadataMov);
-          timerMetadataMov = null;
-        }
-
-        if (esMov && fileId) {
-          timerMetadataMov = setTimeout(function() {
-            if (!metadataCargada) {
-              cambiarAFrameDrive(fileId);
-            }
-          }, 8000);
-        }
-
-        vid.addEventListener("loadedmetadata", function() {
-          metadataCargada = true;
-          if (timerMetadataMov) {
-            clearTimeout(timerMetadataMov);
-            timerMetadataMov = null;
-          }
-          if (tTotal) tTotal.innerText = formatearTiempo(vid.duration);
-        });
-
-        vid.addEventListener("timeupdate", function() {
-          if (arrastrandoBarra) return;
-          var dur = vid.duration || 0;
-          if (tActual) tActual.innerText = formatearTiempo(vid.currentTime);
-          if (tTotal && dur > 0) tTotal.innerText = formatearTiempo(dur);
-          if (slider && dur > 0) {
-            slider.value = Math.round((vid.currentTime / dur) * 1000);
-          }
-        });
-
-        vid.addEventListener("play", function() {
-          if (btnPlay) btnPlay.innerText = "⏸";
-        });
-
-        vid.addEventListener("pause", function() {
-          if (btnPlay) btnPlay.innerText = "▶";
-        });
-
-        vid.addEventListener("ended", function() {
-          if (btnPlay) btnPlay.innerText = "▶";
-          if (slider) slider.value = 0;
-        });
-
-        vid.addEventListener("error", function() {
-          contadorErrores += 1;
-          if (contadorErrores === 1) {
-            var fuentes = vid.querySelectorAll("source");
-            var segundaUrl = (fuentes && fuentes[1] && fuentes[1].src) ? fuentes[1].src : urlDirecta;
-            if (segundaUrl) {
-              vid.src = segundaUrl;
-              vid.load();
-              return;
-            }
-          }
-          cambiarAFrameDrive(fileId);
-        });
       }
 
       function cargarVotosLocales() {
@@ -978,16 +711,16 @@
       }
 
       function actualizarBotonLikeSlide() {
-        var btn = document.getElementById('btnLikeSlide');
+        var btn = document.getElementById("btnLikeSlide");
         if (!btn || personas.length === 0) return;
         var p = personas[indiceActual];
         var total = obtenerConteoLikes(p, indiceActual);
         var liked = usuarioDioLike(p, indiceActual);
         btn.innerText = "♥ " + total;
         if (liked) {
-          btn.classList.add('liked-btn');
+          btn.classList.add("liked-btn");
         } else {
-          btn.classList.remove('liked-btn');
+          btn.classList.remove("liked-btn");
         }
       }
 
@@ -1006,8 +739,8 @@
         renderizarMuro();
 
         fetch(SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             accion: "registrar_like",
             fileId: p.fileId || "",
@@ -1026,7 +759,7 @@
       }
 
       function aplicarDominioCorreo(dominio) {
-        var input = document.getElementById('correoZipInput');
+        var input = document.getElementById("correoZipInput");
         if (!input) return;
         var actual = input.value.trim();
         var usuario = actual.includes("@") ? actual.split("@")[0].trim() : actual;
@@ -1064,28 +797,28 @@
         estaReproduciendo = true;
         actualizarBotonAuto();
         intervaloAuto = setInterval(function() {
-          if (estaReproduciendo && document.getElementById('vistaSlideshow').classList.contains('active')) {
+          if (estaReproduciendo && document.getElementById("vistaSlideshow").classList.contains("active")) {
             siguiente();
           }
         }, INTERVALO_SLIDESHOW_MS);
       }
 
       function actualizarBotonAuto() {
-        var btn = document.getElementById('btnAuto');
+        var btn = document.getElementById("btnAuto");
         if (!btn) return;
         if (estaReproduciendo) {
           btn.innerText = "Pausar Auto-Play";
-          btn.classList.add('active-autoplay');
+          btn.classList.add("active-autoplay");
         } else {
           btn.innerText = "Iniciar Auto-Play";
-          btn.classList.remove('active-autoplay');
+          btn.classList.remove("active-autoplay");
         }
       }
 
       function salirFullscreenSiActivo() {
-        var elem = document.getElementById('vistaSlideshow');
+        var elem = document.getElementById("vistaSlideshow");
         if (elem) {
-          elem.classList.remove('pseudo-fullscreen');
+          elem.classList.remove("pseudo-fullscreen");
         }
         if (document.fullscreenElement && document.exitFullscreen) {
           document.exitFullscreen().catch(function() {});
@@ -1095,10 +828,10 @@
       }
 
       function toggleFullscreenSlideshow() {
-        var elem = document.getElementById('vistaSlideshow');
+        var elem = document.getElementById("vistaSlideshow");
         if (!elem) return;
 
-        var estaPseudo = elem.classList.contains('pseudo-fullscreen');
+        var estaPseudo = elem.classList.contains("pseudo-fullscreen");
         var estaNativo = !!(document.fullscreenElement || document.webkitFullscreenElement);
 
         if (estaPseudo || estaNativo) {
@@ -1106,7 +839,7 @@
           return;
         }
 
-        elem.classList.add('pseudo-fullscreen');
+        elem.classList.add("pseudo-fullscreen");
 
         var req = elem.requestFullscreen || elem.webkitRequestFullscreen;
         if (req) {
@@ -1123,11 +856,11 @@
         destruirVideoActivo();
         detenerAutoPlay();
         salirFullscreenSiActivo();
-        var slideModal = document.getElementById('vistaSlideshow');
-        slideModal.classList.remove('active');
-        slideModal.classList.remove('modo-video-modal');
-        document.getElementById('vistaSubir').classList.remove('active');
-        document.getElementById('vistaDescargar').classList.remove('active');
+        var slideModal = document.getElementById("vistaSlideshow");
+        slideModal.classList.remove("active");
+        slideModal.classList.remove("modo-video-modal");
+        document.getElementById("vistaSubir").classList.remove("active");
+        document.getElementById("vistaDescargar").classList.remove("active");
       }
 
       function cerrarSiFondo(event, modalId) {
@@ -1137,38 +870,38 @@
       }
 
       function abrirModal(modal) {
-        if (modal !== 'slideshow') {
+        if (modal !== "slideshow") {
           destruirVideoActivo();
         }
         detenerAutoPlay();
-        document.getElementById('vistaSlideshow').classList.remove('active');
-        document.getElementById('vistaSubir').classList.remove('active');
-        document.getElementById('vistaDescargar').classList.remove('active');
+        document.getElementById("vistaSlideshow").classList.remove("active");
+        document.getElementById("vistaSubir").classList.remove("active");
+        document.getElementById("vistaDescargar").classList.remove("active");
 
-        if (modal === 'slideshow') {
-          document.getElementById('vistaSlideshow').classList.add('active');
+        if (modal === "slideshow") {
+          document.getElementById("vistaSlideshow").classList.add("active");
           mostrarPersona();
-        } else if (modal === 'subir') {
+        } else if (modal === "subir") {
           salirFullscreenSiActivo();
-          document.getElementById('vistaSlideshow').classList.remove('modo-video-modal');
-          document.getElementById('vistaSubir').classList.add('active');
-          document.getElementById('status').innerText = "";
-          document.getElementById('nombreInput').value = "";
-          document.getElementById('archivoInput').value = "";
+          document.getElementById("vistaSlideshow").classList.remove("modo-video-modal");
+          document.getElementById("vistaSubir").classList.add("active");
+          document.getElementById("status").innerText = "";
+          document.getElementById("nombreInput").value = "";
+          document.getElementById("archivoInput").value = "";
           actualizarProgreso(0, false);
-        } else if (modal === 'descargar') {
+        } else if (modal === "descargar") {
           salirFullscreenSiActivo();
-          document.getElementById('vistaSlideshow').classList.remove('modo-video-modal');
-          document.getElementById('vistaDescargar').classList.add('active');
-          document.getElementById('statusZip').innerText = "";
-          document.getElementById('correoZipInput').value = "";
+          document.getElementById("vistaSlideshow").classList.remove("modo-video-modal");
+          document.getElementById("vistaDescargar").classList.add("active");
+          document.getElementById("statusZip").innerText = "";
+          document.getElementById("correoZipInput").value = "";
         }
       }
 
       function abrirSlideshowEnFoto(indice) {
         if (indice < 0 || indice >= personas.length) return;
         indiceActual = indice;
-        abrirModal('slideshow');
+        abrirModal("slideshow");
       }
 
       function extraerIdDrive(url) {
@@ -1208,23 +941,24 @@
           .replace(/&/g, "&amp;")
           .replace(/</g, "&lt;")
           .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;");
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
       }
 
       function aplicarConfiguracionPortada(titulo, fondoRaw, avatarRaw) {
         tituloActualGaleria = (titulo && String(titulo).trim() !== "") ? String(titulo).trim() : "Galería";
-        document.getElementById('heroTitulo').textContent = tituloActualGaleria;
+        document.getElementById("heroTitulo").textContent = tituloActualGaleria;
         document.title = tituloActualGaleria;
 
-        var heroEl = document.getElementById('heroPortada');
+        var heroEl = document.getElementById("heroPortada");
         if (fondoRaw && String(fondoRaw).trim() !== "") {
           var urlFondo = obtenerUrlImagen(fondoRaw, 1600);
-          heroEl.style.backgroundImage = 'url("' + urlFondo.replace(/"/g, '%22') + '")';
+          heroEl.style.backgroundImage = 'url("' + urlFondo.replace(/"/g, "%22") + '")';
         } else {
           heroEl.style.backgroundImage = "none";
         }
 
-        var avatarEl = document.getElementById('heroAvatar');
+        var avatarEl = document.getElementById("heroAvatar");
         if (avatarRaw && String(avatarRaw).trim() !== "") {
           avatarEl.src = obtenerUrlImagen(avatarRaw, 500);
           avatarEl.alt = tituloActualGaleria;
@@ -1243,14 +977,13 @@
       }
 
       function renderizarMuro() {
-        var contenedor = document.getElementById('contenidoMuro');
+        var contenedor = document.getElementById("contenidoMuro");
 
         if (personas.length === 0) {
           contenedor.className = "estado-muro";
-          contenedor.innerHTML = `
-            <p style="color: #888; font-style: italic;">No hay fotos ni videos registrados todavía.</p>
-            <button class="album-btn" onclick="abrirModal('subir')" style="margin-top: 15px; padding: 12px 24px; font-size: 15px;">➕ Añadir al álbum</button>
-          `;
+          contenedor.innerHTML =
+            '<p style="color: #888; font-style: italic;">No hay fotos ni videos registrados todavía.</p>' +
+            '<button type="button" class="album-btn" onclick="abrirModal(\'subir\')" style="margin-top: 15px; padding: 12px 24px; font-size: 15px;">➕ Añadir al álbum</button>';
           return;
         }
 
@@ -1260,21 +993,21 @@
         personas.forEach(function(p, idx) {
           var urlFoto = obtenerUrlImagen(p.foto, 800);
           var nombreSeguro = escaparHtml(p.nombre);
-          var videoBadge = esVideo(p) ? `<span class="badge-video">▶ Video</span>` : "";
+          var urlFotoSegura = escaparHtml(urlFoto);
+          var videoBadge = esVideo(p) ? '<span class="badge-video">▶</span>' : "";
           var totalLikes = obtenerConteoLikes(p, idx);
 
-          html += `
-            <div class="muro-item" onclick="abrirSlideshowEnFoto(${idx})" title="Ver en slideshow: ${nombreSeguro}">
-              <img src="${urlFoto}" alt="${nombreSeguro}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <div class="muro-fallback" style="display:none;">
-                <span>${esVideo(p) ? "Video" : "Sin vista previa"}</span>
-                <strong>${nombreSeguro}</strong>
-              </div>
-              <span class="badge-likes">♥ ${totalLikes}</span>
-              ${videoBadge}
-              <div class="muro-caption">${nombreSeguro}</div>
-            </div>
-          `;
+          html +=
+            '<div class="muro-item" onclick="abrirSlideshowEnFoto(' + idx + ')" title="Ver en slideshow: ' + nombreSeguro + '">' +
+              '<img src="' + urlFotoSegura + '" alt="' + nombreSeguro + '" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'flex\';">' +
+              '<div class="muro-fallback" style="display:none;">' +
+                '<span>' + (esVideo(p) ? "▶" : "🖼") + '</span>' +
+                '<strong>' + nombreSeguro + '</strong>' +
+              '</div>' +
+              '<span class="badge-likes">♥ ' + totalLikes + '</span>' +
+              videoBadge +
+              '<div class="muro-caption">' + nombreSeguro + '</div>' +
+            '</div>';
         });
 
         contenedor.innerHTML = html;
@@ -1337,7 +1070,7 @@
         personas = lista;
         if (indiceActual >= personas.length) indiceActual = 0;
 
-        if (document.getElementById('vistaSlideshow').classList.contains('active')) {
+        if (document.getElementById("vistaSlideshow").classList.contains("active")) {
           mostrarPersona();
         } else {
           renderizarMuro();
@@ -1345,11 +1078,11 @@
       };
 
       function cargarDatos() {
-        var contenedor = document.getElementById('contenidoMuro');
+        var contenedor = document.getElementById("contenidoMuro");
         contenedor.className = "estado-muro";
-        contenedor.innerHTML = `<p id="mensaje" style="color: #888; font-style: italic;">Cargando galería...</p>`;
+        contenedor.innerHTML = '<p id="mensaje" style="color: #888; font-style: italic;">Cargando galería...</p>';
 
-        var scriptAnterior = document.getElementById('gvizScript');
+        var scriptAnterior = document.getElementById("gvizScript");
         if (scriptAnterior) {
           scriptAnterior.remove();
         }
@@ -1358,8 +1091,8 @@
           clearTimeout(timerCarga);
         }
 
-        var script = document.createElement('script');
-        script.id = 'gvizScript';
+        var script = document.createElement("script");
+        script.id = "gvizScript";
         script.src = "https://docs.google.com/spreadsheets/d/" + encodeURIComponent(SHEET_ID) + "/gviz/tq?gid=0&tqx=out:json;responseHandler:recibirHojaGviz&_=" + Date.now();
         script.onerror = function() {
           if (timerCarga) clearTimeout(timerCarga);
@@ -1374,13 +1107,12 @@
       }
 
       function mostrarErrorCarga(detalle) {
-        var contenedor = document.getElementById('contenidoMuro');
+        var contenedor = document.getElementById("contenidoMuro");
         contenedor.className = "estado-muro";
-        contenedor.innerHTML = `
-          <p style="color: #ff6b6b;">No se pudieron cargar los datos (${detalle}).</p>
-          <button class="btn-compact" onclick="recargarDatos()" style="margin-top: 12px;">Actualizar</button>
-          <button class="album-btn" onclick="abrirModal('subir')" style="margin-top: 12px;">➕ Añadir al álbum</button>
-        `;
+        contenedor.innerHTML =
+          '<p style="color: #ff6b6b;">No se pudieron cargar los datos (' + escaparHtml(detalle) + ').</p>' +
+          '<button type="button" class="btn-compact" onclick="recargarDatos()" style="margin-top: 12px;">Actualizar</button>' +
+          '<button type="button" class="album-btn" onclick="abrirModal(\'subir\')" style="margin-top: 12px;">➕ Añadir al álbum</button>';
       }
 
       function mostrarPersona() {
@@ -1390,85 +1122,61 @@
         var p = personas[indiceActual];
         var nombreSeguro = escaparHtml(p.nombre);
         var fileId = p.fileId || extraerIdDrive(p.urlOriginal || p.foto);
-        var modalEl = document.getElementById('vistaSlideshow');
-        var stageEl = document.getElementById('slideStage');
-        var controlesEl = document.getElementById('botonesControles');
+        var modalEl = document.getElementById("vistaSlideshow");
+        var stageEl = document.getElementById("slideStage");
+        var controlesEl = document.getElementById("botonesControles");
         var videoModo = esVideo(p);
-        var esMov = esArchivoMov(p);
         var mediaHtml = "";
 
         if (modalEl) {
           if (videoModo) {
-            modalEl.classList.add('modo-video-modal');
+            modalEl.classList.add("modo-video-modal");
           } else {
-            modalEl.classList.remove('modo-video-modal');
+            modalEl.classList.remove("modo-video-modal");
           }
           modalEl.scrollTop = 0;
         }
 
         if (stageEl) {
           if (videoModo) {
-            stageEl.classList.add('modo-video');
+            stageEl.classList.add("modo-video");
           } else {
-            stageEl.classList.remove('modo-video');
+            stageEl.classList.remove("modo-video");
           }
         }
 
         if (controlesEl) {
           if (videoModo) {
-            controlesEl.classList.remove('controls-sobre-foto');
-            controlesEl.classList.add('controls-debajo-video');
+            controlesEl.classList.remove("controls-sobre-foto");
+            controlesEl.classList.add("controls-debajo-video");
           } else {
-            controlesEl.classList.remove('controls-debajo-video');
-            controlesEl.classList.add('controls-sobre-foto');
+            controlesEl.classList.remove("controls-debajo-video");
+            controlesEl.classList.add("controls-sobre-foto");
           }
         }
 
         if (videoModo) {
-          var urlVideoDrive = fileId
-            ? obtenerUrlDirectaDrive(fileId)
+          var urlPreviewDrive = fileId
+            ? "https://drive.google.com/file/d/" + encodeURIComponent(fileId) + "/preview"
             : (p.urlOriginal || p.foto);
-          var urlPoster = obtenerUrlImagen(p.foto, 800);
 
-          mediaHtml = `
-            <div class="custom-player-shell">
-              <video id="videoPropio" class="custom-video-surface" data-fileid="${fileId}" data-url="${urlVideoDrive}" poster="${urlPoster}" playsinline preload="metadata">
-                <source src="${urlVideoDrive}" type="video/quicktime">
-                <source src="${urlVideoDrive}" type="video/mp4">
-              </video>
-              <iframe id="frameDriveRespaldo" class="custom-drive-frame" style="display:none;" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
-              <div id="barraVideoPropio" class="custom-player-bar">
-                <div class="custom-seek-row">
-                  <span id="tiempoActualPropio" class="custom-time-label">0:00</span>
-                  <input id="sliderVideoPropio" type="range" class="custom-seek-slider" min="0" max="1000" value="0" onmousedown="iniciarArrastreSeek()" ontouchstart="iniciarArrastreSeek()" oninput="moverSeekEnTiempoReal()" onchange="soltarSeekVideo()" aria-label="Barra de avance del video">
-                  <span id="tiempoTotalPropio" class="custom-time-label">0:00</span>
-                </div>
-                <div class="custom-transport-row">
-                  <button id="btnPlayPropio" type="button" class="custom-ctrl-btn" onclick="togglePlayVideoPropio()">▶</button>
-                  <button id="btnMutePropio" type="button" class="custom-ctrl-btn" onclick="toggleMuteVideoPropio()">🔊</button>
-                </div>
-              </div>
-            </div>
-          `;
+          mediaHtml =
+            '<div class="custom-player-shell">' +
+              '<iframe id="frameDriveRespaldo" class="custom-drive-frame" src="' + escaparHtml(urlPreviewDrive) + '" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>' +
+            '</div>';
         } else {
           var urlFoto = obtenerUrlImagen(p.foto, 1200);
-          mediaHtml = `
-            <button id="btnFullscreen" class="btn-fullscreen-top" onclick="toggleFullscreenSlideshow()" title="Pantalla completa">⛶</button>
-            <img class="slide-img" src="${urlFoto}" alt="${nombreSeguro}" referrerpolicy="no-referrer" onerror="this.style.display='none'; document.getElementById('avisoImg').style.display='block';">
-            <p id="avisoImg" style="display:none; color:#ff9800; font-size:14px;">No se pudo mostrar la imagen de ${nombreSeguro}.</p>
-          `;
+          mediaHtml =
+            '<button type="button" id="btnFullscreen" class="btn-fullscreen-top" onclick="toggleFullscreenSlideshow()" title="Pantalla completa">⛶</button>' +
+            '<img class="slide-img" src="' + escaparHtml(urlFoto) + '" alt="' + nombreSeguro + '" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'; document.getElementById(\'avisoImg\').style.display=\'block\';">' +
+            '<p id="avisoImg" style="display:none; color:#ff9800; font-size:14px;">No se pudo mostrar la imagen de ' + nombreSeguro + '.</p>';
         }
 
-        document.getElementById('contenidoSlide').innerHTML = mediaHtml;
-        document.getElementById('pieSlide').innerHTML = `
-          <h2>${nombreSeguro}</h2>
-          <p style="color: #eee; font-size: 14px; margin: 4px 0 0;">(${indiceActual + 1} de ${personas.length})</p>
-        `;
+        document.getElementById("contenidoSlide").innerHTML = mediaHtml;
+        document.getElementById("pieSlide").innerHTML =
+          '<h2>' + nombreSeguro + '</h2>' +
+          '<p style="color: #eee; font-size: 14px; margin: 4px 0 0;">(' + (indiceActual + 1) + ' de ' + personas.length + ')</p>';
         actualizarBotonLikeSlide();
-
-        if (videoModo) {
-          inicializarEventosVideoPropio(esMov);
-        }
       }
 
       function dispararDescargaItem(p, idx) {
@@ -1484,7 +1192,7 @@
 
         var ext = esVideo(p) ? ".mov" : ".jpg";
 
-        var enlace = document.createElement('a');
+        var enlace = document.createElement("a");
         enlace.href = urlDescarga;
         enlace.download = baseNombre + "_" + (idx + 1) + ext;
         enlace.target = "_blank";
@@ -1500,9 +1208,9 @@
       }
 
       function solicitarZipPorCorreo() {
-        var emailInput = document.getElementById('correoZipInput');
-        var statusZip = document.getElementById('statusZip');
-        var btn = document.getElementById('enviarZipBtn');
+        var emailInput = document.getElementById("correoZipInput");
+        var statusZip = document.getElementById("statusZip");
+        var btn = document.getElementById("enviarZipBtn");
         var email = emailInput ? emailInput.value.trim() : "";
 
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -1513,12 +1221,12 @@
 
         btn.disabled = true;
         statusZip.style.color = "#4FC3F7";
-        statusZip.innerText = "Comprimiendo carpeta y enviando correo...";
+        statusZip.innerText = "Comprimiendo...";
 
         fetch(SCRIPT_URL, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'text/plain;charset=utf-8'
+            "Content-Type": "text/plain;charset=utf-8"
           },
           body: JSON.stringify({
             accion: "enviar_zip_correo",
@@ -1534,10 +1242,10 @@
           btn.disabled = false;
           if (res && res.status === "success") {
             statusZip.style.color = "#4CAF50";
-            statusZip.innerText = res.message || "¡ZIP enviado a tu correo!";
+            statusZip.innerText = "Archivo enviado.";
             setTimeout(function() {
               cerrarModales();
-            }, 2200);
+            }, 1800);
           } else {
             statusZip.style.color = "#E91E63";
             statusZip.innerText = "Error: " + (res && res.message ? res.message : "No se pudo generar el ZIP.");
@@ -1575,8 +1283,8 @@
       }
 
       function actualizarProgreso(porcentaje, visible) {
-        var box = document.getElementById('progresoBox');
-        var barra = document.getElementById('progresoBarra');
+        var box = document.getElementById("progresoBox");
+        var barra = document.getElementById("progresoBarra");
         if (!box || !barra) return;
         box.style.display = visible ? "block" : "none";
         barra.style.width = Math.max(0, Math.min(100, porcentaje)) + "%";
@@ -1586,7 +1294,7 @@
         return new Promise(function(resolve, reject) {
           var reader = new FileReader();
           reader.onload = function(e) {
-            var partes = String(e.target.result || "").split(',');
+            var partes = String(e.target.result || "").split(",");
             resolve({
               filename: file.name || "archivo",
               mimeType: file.type || "application/octet-stream",
@@ -1624,22 +1332,22 @@
                 }
               }
 
-              var canvas = document.createElement('canvas');
+              var canvas = document.createElement("canvas");
               canvas.width = ancho;
               canvas.height = alto;
-              var ctx = canvas.getContext('2d');
+              var ctx = canvas.getContext("2d");
               ctx.drawImage(img, 0, 0, ancho, alto);
 
-              var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+              var dataUrl = canvas.toDataURL("image/jpeg", 0.85);
               var baseNombre = (file.name || "foto").replace(/\.[^/.]+$/, "");
               resolve({
                 filename: baseNombre + ".jpg",
                 mimeType: "image/jpeg",
-                data: dataUrl.split(',')[1]
+                data: dataUrl.split(",")[1]
               });
             };
             img.onerror = function() {
-              var partes = String(e.target.result).split(',');
+              var partes = String(e.target.result).split(",");
               resolve({
                 filename: file.name || "foto.jpg",
                 mimeType: file.type || "image/jpeg",
@@ -1673,9 +1381,9 @@
           };
 
           fetch(SCRIPT_URL, {
-            method: 'POST',
+            method: "POST",
             headers: {
-              'Content-Type': 'text/plain;charset=utf-8'
+              "Content-Type": "text/plain;charset=utf-8"
             },
             body: JSON.stringify(payload)
           })
@@ -1699,10 +1407,10 @@
       }
 
       async function enviarFotos() {
-        var nombre = document.getElementById('nombreInput').value.trim();
-        var input = document.getElementById('archivoInput');
-        var status = document.getElementById('status');
-        var btn = document.getElementById('subirBtn');
+        var nombre = document.getElementById("nombreInput").value.trim();
+        var input = document.getElementById("archivoInput");
+        var status = document.getElementById("status");
+        var btn = document.getElementById("subirBtn");
 
         if (!nombre || input.files.length === 0) {
           status.style.color = "#E91E63";
@@ -1719,20 +1427,20 @@
         try {
           for (var i = 0; i < total; i++) {
             var basePorcentaje = (i / total) * 100;
-            status.innerText = `Preparando archivo ${i + 1} de ${total}... (${Math.round(basePorcentaje)}%)`;
+            status.innerText = "Preparando archivo " + (i + 1) + " de " + total + "... (" + Math.round(basePorcentaje) + "%)";
             var archivoListo = await prepararArchivoParaEnvio(archivos[i]);
 
             await subirUnArchivo(nombre, archivoListo, function(pctArchivo) {
               var pctTotal = Math.round(((i + (pctArchivo / 100)) / total) * 100);
               actualizarProgreso(pctTotal, true);
-              status.innerText = `Subiendo archivo ${i + 1} de ${total}... ${pctTotal}%`;
+              status.innerText = "Subiendo archivo " + (i + 1) + " de " + total + "... " + pctTotal + "%";
             });
           }
 
           actualizarProgreso(100, true);
           status.style.color = "#4CAF50";
           status.innerText = total > 1
-            ? `¡${total} archivos guardados (100%)! Actualizando muro...`
+            ? "¡" + total + " archivos guardados (100%)! Actualizando muro..."
             : "¡Archivo guardado (100%)! Actualizando muro...";
 
           btn.disabled = false;
