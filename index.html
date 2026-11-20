@@ -646,32 +646,49 @@
     <script>
       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7AXiZC4ux58UndrfTa8FVYIc8P9_oMWMKAbaEQU9ADaeuXXJzn2LgorRm07PqsYNayA/exec";
 
-      const EVENTO_DEFAULT = "kululu";
-      const EVENTOS_GALERIA = {
-        "kululu": "1tgTEtJEJCwf57mrh04q4kC1tenLF-1KTjvpmDojLWRk",
-        "copiakululu": "1LVbguql3L4HBe-_HRJ6fAtfC7Ab9LUuzrzP3wmFXXJk",
-        "xv-sofia": "PEGA_AQUI_EL_ID_DE_LA_HOJA_DE_SOFIA"
-      };
-
-      const paramsUrl = new URLSearchParams(window.location.search);
-      const eventoSlug = (paramsUrl.get("evento") || EVENTO_DEFAULT).trim().toLowerCase();
-      const SHEET_ID = EVENTOS_GALERIA[eventoSlug] || EVENTOS_GALERIA[EVENTO_DEFAULT];
-      console.log("Evento activo:", eventoSlug, "Sheet ID:", SHEET_ID);
+      const SHEET_CONTROL_ID = "1r3klz84o7U3nJLqrXp2vJxf2iHDLSHpLUk8XGqBSw_w";
+      const SHEET_ID_DEFAULT = "1tgTEtJEJCwf57mrh04q4kC1tenLF-1KTjvpmDojLWRk";
 
       const INTERVALO_SLIDESHOW_MS = 7000;
-      const STORAGE_LIKES_KEY = "galeria_likes_voto_" + SHEET_ID;
 
+      let sheetIdActivo = SHEET_ID_DEFAULT;
+      let storageLikesKey = "galeria_likes_voto_" + SHEET_ID_DEFAULT;
       let personas = [];
-      let votosLocales = cargarVotosLocales();
+      let votosLocales = {};
       let carpetaDestinoE4 = "";
       let tituloActualGaleria = "Galería";
       let indiceActual = 0;
       let intervaloAuto = null;
       let estaReproduciendo = false;
       let timerCarga = null;
+      let timerControl = null;
+
+      function normalizarSlug(texto) {
+        return String(texto || "")
+          .trim()
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[_\s]+/g, "-")
+          .replace(/[^a-z0-9-]/g, "")
+          .replace(/-+/g, "-")
+          .replace(/^-+|-+$/g, "");
+      }
+
+      function obtenerSlugSolicitado() {
+        var paramsUrl = new URLSearchParams(window.location.search);
+        var raw = paramsUrl.get("evento");
+        if (!raw) {
+          var busqueda = window.location.search.replace(/^\?/, "").trim();
+          if (busqueda && !busqueda.includes("=")) {
+            raw = decodeURIComponent(busqueda);
+          }
+        }
+        return normalizarSlug(raw);
+      }
 
       window.onload = function() {
-        cargarDatos();
+        iniciarCargaGaleria();
         actualizarVisibilidadSubirArriba();
       };
 
@@ -692,9 +709,9 @@
         return "https://drive.usercontent.google.com/download?id=" + encodeURIComponent(fileId) + "&export=download&confirm=t";
       }
 
-      function cargarVotosLocales() {
+      function cargarVotosLocales(claveStorage) {
         try {
-          var raw = localStorage.getItem(STORAGE_LIKES_KEY);
+          var raw = localStorage.getItem(claveStorage);
           return raw ? JSON.parse(raw) : {};
         } catch (e) {
           return {};
@@ -703,7 +720,7 @@
 
       function guardarVotosLocales() {
         try {
-          localStorage.setItem(STORAGE_LIKES_KEY, JSON.stringify(votosLocales));
+          localStorage.setItem(storageLikesKey, JSON.stringify(votosLocales));
         } catch (e) {}
       }
 
@@ -755,7 +772,7 @@
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             accion: "registrar_like",
-            sheetId: SHEET_ID,
+            sheetId: sheetIdActivo,
             fileId: p.fileId || "",
             delta: delta
           })
@@ -1026,6 +1043,94 @@
         contenedor.innerHTML = html;
       }
 
+      function limpiarTimersCarga() {
+        if (timerControl) {
+          clearTimeout(timerControl);
+          timerControl = null;
+        }
+        if (timerCarga) {
+          clearTimeout(timerCarga);
+          timerCarga = null;
+        }
+      }
+
+      function activarHojaGaleria(nuevoSheetId) {
+        sheetIdActivo = (nuevoSheetId && String(nuevoSheetId).trim() !== "")
+          ? String(nuevoSheetId).trim()
+          : SHEET_ID_DEFAULT;
+        storageLikesKey = "galeria_likes_voto_" + sheetIdActivo;
+        votosLocales = cargarVotosLocales(storageLikesKey);
+        cargarDatosDeHoja(sheetIdActivo);
+      }
+
+      window.recibirControlGviz = function(resp) {
+        if (timerControl) {
+          clearTimeout(timerControl);
+          timerControl = null;
+        }
+
+        var slugBuscado = obtenerSlugSolicitado();
+        var sheetResuelto = SHEET_ID_DEFAULT;
+
+        if (resp && resp.status !== "error" && resp.table && Array.isArray(resp.table.rows)) {
+          for (var i = 0; i < resp.table.rows.length; i++) {
+            var fila = resp.table.rows[i];
+            var colA = obtenerValorCelda(fila, 0);
+            var colB = obtenerValorCelda(fila, 1);
+
+            if (!colA || !colB) continue;
+
+            var slugFila = normalizarSlug(colA);
+            var idFila = extraerIdDrive(colB);
+
+            if (idFila) {
+              if (i === 1 && !slugBuscado) {
+                sheetResuelto = idFila;
+              }
+              if (slugBuscado && slugFila === slugBuscado) {
+                sheetResuelto = idFila;
+                break;
+              }
+            }
+          }
+        }
+
+        activarHojaGaleria(sheetResuelto);
+      };
+
+      function iniciarCargaGaleria() {
+        var contenedor = document.getElementById("contenidoMuro");
+        contenedor.className = "estado-muro";
+        contenedor.innerHTML = '<p id="mensaje" style="color: #888; font-style: italic;">Cargando galería...</p>';
+
+        limpiarTimersCarga();
+
+        var slugBuscado = obtenerSlugSolicitado();
+        if (!slugBuscado && !SHEET_CONTROL_ID) {
+          activarHojaGaleria(SHEET_ID_DEFAULT);
+          return;
+        }
+
+        var scriptAnterior = document.getElementById("gvizControlScript");
+        if (scriptAnterior) {
+          scriptAnterior.remove();
+        }
+
+        var script = document.createElement("script");
+        script.id = "gvizControlScript";
+        script.src = "https://docs.google.com/spreadsheets/d/" + encodeURIComponent(SHEET_CONTROL_ID) + "/gviz/tq?gid=0&tqx=out:json;responseHandler:recibirControlGviz&_=" + Date.now();
+        script.onerror = function() {
+          if (timerControl) clearTimeout(timerControl);
+          activarHojaGaleria(SHEET_ID_DEFAULT);
+        };
+
+        timerControl = setTimeout(function() {
+          activarHojaGaleria(SHEET_ID_DEFAULT);
+        }, 7000);
+
+        document.body.appendChild(script);
+      }
+
       window.recibirHojaGviz = function(resp) {
         if (timerCarga) {
           clearTimeout(timerCarga);
@@ -1090,7 +1195,7 @@
         }
       };
 
-      function cargarDatos() {
+      function cargarDatosDeHoja(idHoja) {
         var contenedor = document.getElementById("contenidoMuro");
         contenedor.className = "estado-muro";
         contenedor.innerHTML = '<p id="mensaje" style="color: #888; font-style: italic;">Cargando galería...</p>';
@@ -1106,7 +1211,7 @@
 
         var script = document.createElement("script");
         script.id = "gvizScript";
-        script.src = "https://docs.google.com/spreadsheets/d/" + encodeURIComponent(SHEET_ID) + "/gviz/tq?gid=0&tqx=out:json;responseHandler:recibirHojaGviz&_=" + Date.now();
+        script.src = "https://docs.google.com/spreadsheets/d/" + encodeURIComponent(idHoja) + "/gviz/tq?gid=0&tqx=out:json;responseHandler:recibirHojaGviz&_=" + Date.now();
         script.onerror = function() {
           if (timerCarga) clearTimeout(timerCarga);
           mostrarErrorCarga("No se pudo conectar con Google Sheets.");
@@ -1243,7 +1348,7 @@
           },
           body: JSON.stringify({
             accion: "enviar_zip_correo",
-            sheetId: SHEET_ID,
+            sheetId: sheetIdActivo,
             email: email,
             carpetaUrl: carpetaDestinoE4,
             titulo: tituloActualGaleria
@@ -1293,7 +1398,7 @@
       }
 
       function recargarDatos() {
-        cargarDatos();
+        iniciarCargaGaleria();
       }
 
       function actualizarProgreso(porcentaje, visible) {
@@ -1387,7 +1492,7 @@
           }, 220);
 
           var payload = {
-            sheetId: SHEET_ID,
+            sheetId: sheetIdActivo,
             nombre: nombre,
             filename: archivoListo.filename,
             mimeType: archivoListo.mimeType,
@@ -1461,7 +1566,7 @@
           btn.disabled = false;
           setTimeout(function() {
             cerrarModales();
-            cargarDatos();
+            cargarDatosDeHoja(sheetIdActivo);
           }, 1400);
         } catch (err) {
           status.style.color = "#E91E63";
