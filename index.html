@@ -644,8 +644,19 @@
     </div>
 
     <script>
-      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw4NvLvWG3ErKTyfZJjIxcm9e9CD9zv7wpG81X4dDae1c91AIw-v1OLPfhVQB7EWck6Ag/exec";
-      const SHEET_ID = "1tgTEtJEJCwf57mrh04q4kC1tenLF-1KTjvpmDojLWRk";
+      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7AXiZC4ux58UndrfTa8FVYIc8P9_oMWMKAbaEQU9ADaeuXXJzn2LgorRm07PqsYNayA/exec";
+
+      const EVENTO_DEFAULT = "kululu";
+      const EVENTOS_GALERIA = {
+        "kululu": "1tgTEtJEJCwf57mrh04q4kC1tenLF-1KTjvpmDojLWRk",
+        "boda-ana": "PEGA_AQUI_EL_ID_DE_LA_HOJA_DE_ANA",
+        "xv-sofia": "PEGA_AQUI_EL_ID_DE_LA_HOJA_DE_SOFIA"
+      };
+
+      const paramsUrl = new URLSearchParams(window.location.search);
+      const eventoSlug = (paramsUrl.get("evento") || EVENTO_DEFAULT).trim().toLowerCase();
+      const SHEET_ID = EVENTOS_GALERIA[eventoSlug] || EVENTOS_GALERIA[EVENTO_DEFAULT];
+
       const INTERVALO_SLIDESHOW_MS = 7000;
       const STORAGE_LIKES_KEY = "galeria_likes_voto_" + SHEET_ID;
 
@@ -743,6 +754,7 @@
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             accion: "registrar_like",
+            sheetId: SHEET_ID,
             fileId: p.fileId || "",
             delta: delta
           })
@@ -1230,6 +1242,7 @@
           },
           body: JSON.stringify({
             accion: "enviar_zip_correo",
+            sheetId: SHEET_ID,
             email: email,
             carpetaUrl: carpetaDestinoE4,
             titulo: tituloActualGaleria
@@ -1373,6 +1386,7 @@
           }, 220);
 
           var payload = {
+            sheetId: SHEET_ID,
             nombre: nombre,
             filename: archivoListo.filename,
             mimeType: archivoListo.mimeType,
