@@ -24,55 +24,123 @@
         display: flex;
       }
 
-      /* VISTA 1: MURO TIPO INSTAGRAM */
+      /* VISTA 1: MURO CON PORTADA SUPERIOR TIPO EVENTO */
       #vistaMuro {
         flex-direction: column;
         align-items: center;
-        padding: 20px 14px 40px;
+        padding: 0 0 44px;
       }
-      .muro-header {
+
+      .hero-portada {
+        position: relative;
         width: 100%;
         max-width: 960px;
+        min-height: 310px;
+        background-color: #1c1b29;
+        background-size: cover;
+        background-position: center;
         display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 20px;
-        padding-bottom: 14px;
-        border-bottom: 1px solid #2a2a2a;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 24px 18px 26px;
+        box-sizing: border-box;
+        overflow: hidden;
       }
-      .muro-header h1 {
+      @media (min-width: 640px) {
+        .hero-portada {
+          min-height: 360px;
+          padding: 32px 28px 30px;
+          border-bottom-left-radius: 14px;
+          border-bottom-right-radius: 14px;
+        }
+      }
+      .hero-portada::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to bottom,
+          rgba(12, 12, 18, 0.25) 0%,
+          rgba(12, 12, 18, 0.55) 55%,
+          rgba(12, 12, 18, 0.88) 100%
+        );
+        z-index: 0;
+      }
+      .hero-contenido {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+      }
+      .hero-top-bar {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        z-index: 2;
+        display: flex;
+        gap: 8px;
+      }
+      .hero-avatar {
+        width: 112px;
+        height: 112px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+        background: #242424;
+      }
+      .hero-titulo {
         margin: 0;
-        font-size: 22px;
-        letter-spacing: 0.5px;
+        font-size: 28px;
+        line-height: 1.15;
+        font-weight: 700;
+        color: #ffffff;
+        text-shadow: 0 2px 12px rgba(0, 0, 0, 0.75);
       }
-      .muro-acciones {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
+      @media (min-width: 640px) {
+        .hero-titulo {
+          font-size: 34px;
+        }
+      }
+
+      .muro-grid-wrapper {
+        width: 100%;
+        max-width: 960px;
+        padding: 12px 10px 0;
+        box-sizing: border-box;
+      }
+      @media (min-width: 640px) {
+        .muro-grid-wrapper {
+          padding: 18px 0 0;
+        }
       }
       .muro-grid {
         width: 100%;
-        max-width: 960px;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
+        gap: 4px;
       }
       @media (min-width: 640px) {
         .muro-grid {
-          gap: 14px;
+          gap: 12px;
         }
       }
       .muro-item {
         position: relative;
         aspect-ratio: 1 / 1;
         background: #1e1e1e;
-        border-radius: 6px;
+        border-radius: 4px;
         overflow: hidden;
         cursor: pointer;
         border: 1px solid #2b2b2b;
         transition: transform 0.18s ease, border-color 0.18s ease;
+      }
+      @media (min-width: 640px) {
+        .muro-item {
+          border-radius: 8px;
+        }
       }
       .muro-item:hover {
         transform: scale(1.015);
@@ -113,8 +181,13 @@
         text-align: center;
       }
 
-      /* VISTA 2: SLIDESHOW AL TOCAR UNA FOTO */
+      /* VISTA 2: SLIDESHOW (FONDO NEGRO CON 75% DE TRANSPARENCIA) */
       #vistaSlideshow {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        background-color: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(3px);
         flex-direction: column;
         align-items: center;
         justify-content: center;
@@ -123,13 +196,13 @@
       }
       .container {
         max-width: 92%;
-        max-height: 85vh;
+        max-height: 88vh;
       }
       .slide-img {
         max-width: 100%;
         max-height: 55vh;
         border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.65);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.75);
         object-fit: contain;
         margin-bottom: 16px;
       }
@@ -157,7 +230,7 @@
         background: #1e1e1e;
         padding: 28px;
         border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         width: 100%;
         max-width: 400px;
         box-sizing: border-box;
@@ -183,42 +256,58 @@
         color: white;
         border: 1px solid #444;
         padding: 10px 16px;
-        border-radius: 6px;
+        border-radius: 8px;
         cursor: pointer;
         font-size: 14px;
-        transition: background 0.2s;
+        transition: background 0.2s, transform 0.12s;
       }
       button:hover { background-color: #333; }
       button.primary { background-color: #4CAF50; border: none; }
       button.primary:hover { background-color: #43a047; }
-      button.info { background-color: #0288D1; border: none; }
+      button.info { background-color: rgba(2, 136, 209, 0.9); border: none; }
       button.info:hover { background-color: #0277BD; }
-      button.accent { background-color: #E91E63; border: none; font-weight: bold; }
-      button.accent:hover { background-color: #C2185B; }
+      button.album-btn {
+        background-color: rgba(24, 24, 27, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        color: #ffffff;
+        font-weight: 600;
+        padding: 11px 18px;
+        border-radius: 10px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+      }
+      button.album-btn:hover {
+        background-color: rgba(39, 39, 44, 0.98);
+      }
 
       #status { margin-top: 15px; font-size: 14px; font-weight: 600; text-align: center; }
       .estado-muro {
         width: 100%;
-        max-width: 960px;
         text-align: center;
         padding: 40px 16px;
+        box-sizing: border-box;
       }
     </style>
   </head>
   <body>
 
-    <!-- VISTA 1: MURO INICIAL TIPO INSTAGRAM -->
+    <!-- VISTA 1: MURO INICIAL CON PORTADA SUPERIOR -->
     <div id="vistaMuro" class="view active">
-      <div class="muro-header">
-        <h1>📸 Galería</h1>
-        <div class="muro-acciones">
-          <button class="info" onclick="recargarDatos()">🔄 Actualizar</button>
-          <button class="accent" onclick="cambiarVista('subir')">➕ Subir mi Foto</button>
+      <div id="heroPortada" class="hero-portada">
+        <div class="hero-top-bar">
+          <button class="info" onclick="recargarDatos()" title="Actualizar galería">🔄</button>
+        </div>
+
+        <div class="hero-contenido">
+          <img id="heroAvatar" class="hero-avatar" src="" alt="Foto de portada" style="display:none;" referrerpolicy="no-referrer" onerror="this.style.display='none';">
+          <h1 id="heroTitulo" class="hero-titulo">Galería</h1>
+          <button class="album-btn" onclick="cambiarVista('subir')">➕ Añadir al álbum</button>
         </div>
       </div>
 
-      <div id="contenidoMuro" class="estado-muro">
-        <p id="mensaje" style="color: #888; font-style: italic;">Cargando galería...</p>
+      <div class="muro-grid-wrapper">
+        <div id="contenidoMuro" class="estado-muro">
+          <p id="mensaje" style="color: #888; font-style: italic;">Cargando galería...</p>
+        </div>
       </div>
     </div>
 
@@ -232,7 +321,7 @@
           <button onclick="anterior()">❮ Anterior</button>
           <button id="btnAuto" class="primary" onclick="toggleAuto()">Pausar Auto-Play</button>
           <button onclick="siguiente()">Siguiente ❯</button>
-          <button class="accent" onclick="cambiarVista('subir')">➕ Subir mi Foto</button>
+          <button class="album-btn" onclick="cambiarVista('subir')">➕ Añadir al álbum</button>
         </div>
       </div>
     </div>
@@ -263,6 +352,7 @@
     <script>
       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7AXiZC4ux58UndrfTa8FVYIc8P9_oMWMKAbaEQU9ADaeuXXJzn2LgorRm07PqsYNayA/exec";
       const SHEET_ID = "1tgTEtJEJCwf57mrh04q4kC1tenLF-1KTjvpmDojLWRk";
+      const INTERVALO_SLIDESHOW_MS = 6000; // 2 segundos más lento (6s)
 
       let personas = [];
       let indiceActual = 0;
@@ -287,7 +377,7 @@
           if (estaReproduciendo && document.getElementById('vistaSlideshow').classList.contains('active')) {
             siguiente();
           }
-        }, 4000);
+        }, INTERVALO_SLIDESHOW_MS);
       }
 
       function cambiarVista(vista) {
@@ -333,10 +423,11 @@
         return "";
       }
 
-      function obtenerUrlImagen(fotoOriginal) {
+      function obtenerUrlImagen(fotoOriginal, ancho) {
+        var sz = ancho || 1000;
         var fileId = extraerIdDrive(fotoOriginal);
         return fileId
-          ? "https://drive.google.com/thumbnail?id=" + encodeURIComponent(fileId) + "&sz=w1000"
+          ? "https://drive.google.com/thumbnail?id=" + encodeURIComponent(fileId) + "&sz=w" + sz
           : fotoOriginal;
       }
 
@@ -348,6 +439,37 @@
           .replace(/"/g, "&quot;");
       }
 
+      function aplicarConfiguracionPortada(titulo, fondoRaw, avatarRaw) {
+        var tituloFinal = (titulo && String(titulo).trim() !== "") ? String(titulo).trim() : "Galería";
+        document.getElementById('heroTitulo').textContent = tituloFinal;
+        document.title = tituloFinal;
+
+        var heroEl = document.getElementById('heroPortada');
+        if (fondoRaw && String(fondoRaw).trim() !== "") {
+          var urlFondo = obtenerUrlImagen(fondoRaw, 1600);
+          heroEl.style.backgroundImage = 'url("' + urlFondo.replace(/"/g, '%22') + '")';
+        } else {
+          heroEl.style.backgroundImage = "none";
+        }
+
+        var avatarEl = document.getElementById('heroAvatar');
+        if (avatarRaw && String(avatarRaw).trim() !== "") {
+          avatarEl.src = obtenerUrlImagen(avatarRaw, 500);
+          avatarEl.alt = tituloFinal;
+          avatarEl.style.display = "block";
+        } else {
+          avatarEl.removeAttribute("src");
+          avatarEl.style.display = "none";
+        }
+      }
+
+      function obtenerValorCelda(filaObj, colIdx) {
+        if (!filaObj || !Array.isArray(filaObj.c) || !filaObj.c[colIdx]) return "";
+        var celda = filaObj.c[colIdx];
+        if (celda.v === null || celda.v === undefined) return "";
+        return String(celda.v).trim();
+      }
+
       function renderizarMuro() {
         var contenedor = document.getElementById('contenidoMuro');
 
@@ -355,7 +477,7 @@
           contenedor.className = "estado-muro";
           contenedor.innerHTML = `
             <p style="color: #888; font-style: italic;">No hay fotos registradas todavía.</p>
-            <button class="accent" onclick="cambiarVista('subir')" style="margin-top: 15px; padding: 12px 24px; font-size: 16px;">➕ Subir la primera foto</button>
+            <button class="album-btn" onclick="cambiarVista('subir')" style="margin-top: 15px; padding: 12px 24px; font-size: 15px;">➕ Añadir la primera foto</button>
           `;
           return;
         }
@@ -364,7 +486,7 @@
         var html = "";
 
         personas.forEach(function(p, idx) {
-          var urlFoto = obtenerUrlImagen(p.foto);
+          var urlFoto = obtenerUrlImagen(p.foto, 800);
           var nombreSeguro = escaparHtml(p.nombre);
           html += `
             <div class="muro-item" onclick="abrirSlideshowEnFoto(${idx})" title="Ver en slideshow: ${nombreSeguro}">
@@ -391,6 +513,18 @@
           mostrarErrorCarga("La hoja no devolvió datos válidos o no está compartida como 'Cualquier persona con el enlace'.");
           return;
         }
+
+        // En gviz, la fila 0 corresponde a la fila 1 de la hoja (o a la primera fila de datos).
+        // Columna E es el índice 4 (A=0, B=1, C=2, D=3, E=4).
+        var fila0 = resp.table.rows[0];
+        var tituloE1 = obtenerValorCelda(fila0, 4);
+        var fondoE2 = obtenerValorCelda(fila0, 5); // Por si alguien lo pone en E2 como fila 1/col F, revisamos también fila 1 col 4:
+        if (!fondoE2 && resp.table.rows[1]) {
+          fondoE2 = obtenerValorCelda(resp.table.rows[1], 4);
+        }
+        var avatarE3 = resp.table.rows[2] ? obtenerValorCelda(resp.table.rows[2], 4) : "";
+
+        aplicarConfiguracionPortada(tituloE1, fondoE2, avatarE3);
 
         var lista = [];
         resp.table.rows.forEach(function(filaObj, idx) {
@@ -461,14 +595,14 @@
         contenedor.innerHTML = `
           <p style="color: #ff6b6b;">No se pudieron cargar los datos (${detalle}).</p>
           <button class="info" onclick="recargarDatos()" style="margin-top: 12px;">🔄 Reintentar</button>
-          <button class="accent" onclick="cambiarVista('subir')" style="margin-top: 12px;">➕ Subir mi Foto</button>
+          <button class="album-btn" onclick="cambiarVista('subir')" style="margin-top: 12px;">➕ Añadir al álbum</button>
         `;
       }
 
       function mostrarPersona() {
         if (personas.length === 0) return;
         var p = personas[indiceActual];
-        var urlFoto = obtenerUrlImagen(p.foto);
+        var urlFoto = obtenerUrlImagen(p.foto, 1200);
         var nombreSeguro = escaparHtml(p.nombre);
 
         var html = `
