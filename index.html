@@ -167,6 +167,18 @@
         padding: 2px 6px;
         border-radius: 4px;
       }
+      .badge-likes {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background: rgba(18, 18, 22, 0.78);
+        color: #ff6b8b;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 107, 139, 0.35);
+      }
       .muro-caption {
         position: absolute;
         left: 0;
@@ -280,7 +292,7 @@
         position: absolute;
         top: 8px;
         right: 8px;
-        z-index: 6;
+        z-index: 7;
         width: 30px;
         height: 30px;
         padding: 0;
@@ -308,19 +320,51 @@
       }
       .video-wrapper {
         position: relative;
-        width: 100%;
-        max-width: 640px;
-        padding: 10px 10px 66px;
+        width: 82vw;
+        min-width: 270px;
+        max-width: 616px;
+        padding: 10px 10px 70px;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
+      }
+      .video-stage-inner {
+        position: relative;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .slide-video-el {
+        width: 100%;
+        max-height: 42vh;
+        border-radius: 10px;
+        background: #000;
+        display: block;
+      }
+      .btn-center-play {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 6;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 700;
+        border-radius: 999px;
+        background-color: rgba(24, 24, 28, 0.78);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        opacity: 0.88;
+      }
+      .btn-center-play:hover {
+        opacity: 1;
+        background-color: rgba(42, 42, 48, 0.95);
       }
       .slide-video-frame {
-        width: 82vw;
-        min-width: 270px;
-        max-width: 616px;
-        height: 300px;
+        width: 100%;
+        height: 250px;
         border: 0;
         border-radius: 10px;
         background: #000;
@@ -361,6 +405,10 @@
       .controls-sobre-foto button.active-autoplay {
         background-color: rgba(76, 175, 80, 0.78);
         border-color: rgba(255, 255, 255, 0.35);
+      }
+      .controls-sobre-foto button.liked-btn {
+        background-color: rgba(225, 29, 72, 0.82);
+        border-color: rgba(255, 255, 255, 0.4);
       }
 
       h2 {
@@ -523,6 +571,7 @@
             </div>
             <div class="controls-row">
               <button class="btn-compact" onclick="cerrarModales()">🧱 Ver Muro</button>
+              <button id="btnLikeSlide" class="btn-compact" onclick="toggleLikeActual()">♥ 0</button>
               <button class="btn-compact" onclick="descargarFotoActiva()">⬇ Descargar</button>
               <button class="btn-compact" onclick="abrirModal('subir')">➕ Añadir al álbum</button>
             </div>
@@ -590,8 +639,10 @@
       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7AXiZC4ux58UndrfTa8FVYIc8P9_oMWMKAbaEQU9ADaeuXXJzn2LgorRm07PqsYNayA/exec";
       const SHEET_ID = "1tgTEtJEJCwf57mrh04q4kC1tenLF-1KTjvpmDojLWRk";
       const INTERVALO_SLIDESHOW_MS = 7000;
+      const STORAGE_LIKES_KEY = "galeria_likes_" + SHEET_ID;
 
       let personas = [];
+      let likesMapa = cargarLikesGuardados();
       let carpetaDestinoE4 = "";
       let tituloActualGaleria = "Galería";
       let indiceActual = 0;
@@ -605,6 +656,87 @@
       };
 
       window.addEventListener("scroll", actualizarVisibilidadSubirArriba, { passive: true });
+
+      function cargarLikesGuardados() {
+        try {
+          var raw = localStorage.getItem(STORAGE_LIKES_KEY);
+          return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+          return {};
+        }
+      }
+
+      function guardarLikes() {
+        try {
+          localStorage.setItem(STORAGE_LIKES_KEY, JSON.stringify(likesMapa));
+        } catch (e) {}
+      }
+
+      function obtenerClaveItem(item, idx) {
+        if (!item) return "item_" + idx;
+        return item.fileId || item.foto || ("item_" + idx);
+      }
+
+      function obtenerConteoLikes(item, idx) {
+        var clave = obtenerClaveItem(item, idx);
+        var entry = likesMapa[clave];
+        if (!entry) return 0;
+        if (typeof entry === "number") return entry;
+        return entry.count || 0;
+      }
+
+      function usuarioDioLike(item, idx) {
+        var clave = obtenerClaveItem(item, idx);
+        var entry = likesMapa[clave];
+        return !!(entry && typeof entry === "object" && entry.liked);
+      }
+
+      function actualizarBotonLikeSlide() {
+        var btn = document.getElementById('btnLikeSlide');
+        if (!btn || personas.length === 0) return;
+        var p = personas[indiceActual];
+        var total = obtenerConteoLikes(p, indiceActual);
+        var liked = usuarioDioLike(p, indiceActual);
+        btn.innerText = "♥ " + total;
+        if (liked) {
+          btn.classList.add('liked-btn');
+        } else {
+          btn.classList.remove('liked-btn');
+        }
+      }
+
+      function toggleLikeActual() {
+        if (personas.length === 0) return;
+        var p = personas[indiceActual];
+        var clave = obtenerClaveItem(p, indiceActual);
+        var actual = likesMapa[clave];
+        var count = (actual && typeof actual === "object") ? (actual.count || 0) : (typeof actual === "number" ? actual : 0);
+        var liked = !!(actual && typeof actual === "object" && actual.liked);
+
+        if (liked) {
+          count = Math.max(0, count - 1);
+          liked = false;
+        } else {
+          count = count + 1;
+          liked = true;
+        }
+
+        likesMapa[clave] = { count: count, liked: liked };
+        guardarLikes();
+        actualizarBotonLikeSlide();
+        renderizarMuro();
+
+        fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            accion: "registrar_like",
+            nombre: p.nombre,
+            fileId: p.fileId || "",
+            totalLikes: count
+          })
+        }).catch(function() {});
+      }
 
       function aplicarDominioCorreo(dominio) {
         var input = document.getElementById('correoZipInput');
@@ -841,6 +973,7 @@
           var urlFoto = obtenerUrlImagen(p.foto, 800);
           var nombreSeguro = escaparHtml(p.nombre);
           var videoBadge = esVideo(p) ? `<span class="badge-video">▶ Video</span>` : "";
+          var totalLikes = obtenerConteoLikes(p, idx);
 
           html += `
             <div class="muro-item" onclick="abrirSlideshowEnFoto(${idx})" title="Ver en slideshow: ${nombreSeguro}">
@@ -849,6 +982,7 @@
                 <span>${esVideo(p) ? "Video" : "Sin vista previa"}</span>
                 <strong>${nombreSeguro}</strong>
               </div>
+              <span class="badge-likes">♥ ${totalLikes}</span>
               ${videoBadge}
               <div class="muro-caption">${nombreSeguro}</div>
             </div>
@@ -958,6 +1092,20 @@
         `;
       }
 
+      function toggleCentroVideo() {
+        var vid = document.getElementById('videoReproductor');
+        var btn = document.getElementById('btnCentroPlay');
+        if (!vid) return;
+        if (vid.paused) {
+          vid.play().then(function() {
+            if (btn) btn.innerText = "⏸";
+          }).catch(function() {});
+        } else {
+          vid.pause();
+          if (btn) btn.innerText = "▶";
+        }
+      }
+
       function mostrarPersona() {
         if (personas.length === 0) return;
         var p = personas[indiceActual];
@@ -966,302 +1114,22 @@
         var mediaHtml = "";
 
         if (esVideo(p)) {
+          var urlStream = fileId
+            ? "https://drive.google.com/uc?export=download&id=" + encodeURIComponent(fileId)
+            : (p.urlOriginal || p.foto);
           var urlPreview = obtenerUrlVideoDrive(fileId, p.urlOriginal || p.foto);
+
           mediaHtml = `
             <div class="video-wrapper">
-              <iframe class="slide-video-frame" src="${urlPreview}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+              <div id="videoDirectoBox" class="video-stage-inner">
+                <video id="videoReproductor" class="slide-video-el" src="${urlStream}" autoplay muted playsinline controls onplay="var b=document.getElementById('btnCentroPlay'); if(b) b.innerText='⏸';" onpause="var b=document.getElementById('btnCentroPlay'); if(b) b.innerText='▶';" onerror="document.getElementById('videoDirectoBox').style.display='none'; document.getElementById('videoIframeBox').style.display='block';"></video>
+                <button id="btnCentroPlay" type="button" class="btn-center-play" onclick="toggleCentroVideo()" title="Play / Pausa">⏸</button>
+              </div>
+              <div id="videoIframeBox" style="display:none; width:100%;">
+                <iframe class="slide-video-frame" src="${urlPreview}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+              </div>
             </div>
           `;
         } else {
           var urlFoto = obtenerUrlImagen(p.foto, 1200);
-          mediaHtml = `
-            <img class="slide-img" src="${urlFoto}" alt="${nombreSeguro}" referrerpolicy="no-referrer" onerror="this.style.display='none'; document.getElementById('avisoImg').style.display='block';">
-            <p id="avisoImg" style="display:none; color:#ff9800; font-size:14px;">No se pudo mostrar la imagen de ${nombreSeguro}.</p>
-          `;
-        }
-
-        document.getElementById('contenidoSlide').innerHTML = mediaHtml;
-        document.getElementById('pieSlide').innerHTML = `
-          <h2>${nombreSeguro}</h2>
-          <p style="color: #eee; font-size: 14px; margin: 4px 0 0;">(${indiceActual + 1} de ${personas.length})</p>
-        `;
-      }
-
-      function dispararDescargaItem(p, idx) {
-        var fileId = p.fileId || extraerIdDrive(p.urlOriginal || p.foto);
-        var urlDescarga = fileId
-          ? "https://drive.google.com/uc?export=download&id=" + encodeURIComponent(fileId)
-          : p.foto;
-
-        var baseNombre = (p.nombre || "archivo_" + (idx + 1))
-          .toLowerCase()
-          .replace(/[^a-z0-9-_]+/g, "_")
-          .replace(/^_+|_+$/g, "") || ("archivo_" + (idx + 1));
-
-        var ext = esVideo(p) ? ".mov" : ".jpg";
-
-        var enlace = document.createElement('a');
-        enlace.href = urlDescarga;
-        enlace.download = baseNombre + "_" + (idx + 1) + ext;
-        enlace.target = "_blank";
-        enlace.rel = "noopener";
-        document.body.appendChild(enlace);
-        enlace.click();
-        enlace.remove();
-      }
-
-      function descargarFotoActiva() {
-        if (personas.length === 0) return;
-        dispararDescargaItem(personas[indiceActual], indiceActual);
-      }
-
-      function solicitarZipPorCorreo() {
-        var emailInput = document.getElementById('correoZipInput');
-        var statusZip = document.getElementById('statusZip');
-        var btn = document.getElementById('enviarZipBtn');
-        var email = emailInput ? emailInput.value.trim() : "";
-
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          statusZip.style.color = "#E91E63";
-          statusZip.innerText = "Por favor escribe un correo válido (ej. usuario@gmail.com).";
-          return;
-        }
-
-        btn.disabled = true;
-        statusZip.style.color = "#4FC3F7";
-        statusZip.innerText = "Comprimiendo carpeta y enviando correo...";
-
-        fetch(SCRIPT_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8'
-          },
-          body: JSON.stringify({
-            accion: "enviar_zip_correo",
-            email: email,
-            carpetaUrl: carpetaDestinoE4,
-            titulo: tituloActualGaleria
-          })
-        })
-        .then(function(response) {
-          return response.json();
-        })
-        .then(function(res) {
-          btn.disabled = false;
-          if (res && res.status === "success") {
-            statusZip.style.color = "#4CAF50";
-            statusZip.innerText = res.message || "¡ZIP enviado a tu correo!";
-            setTimeout(function() {
-              cerrarModales();
-            }, 2200);
-          } else {
-            statusZip.style.color = "#E91E63";
-            statusZip.innerText = "Error: " + (res && res.message ? res.message : "No se pudo generar el ZIP.");
-          }
-        })
-        .catch(function(err) {
-          btn.disabled = false;
-          statusZip.style.color = "#E91E63";
-          statusZip.innerText = "Error de conexión: " + err.message;
-        });
-      }
-
-      function siguiente() {
-        if (personas.length === 0) return;
-        indiceActual = (indiceActual + 1) % personas.length;
-        mostrarPersona();
-      }
-
-      function anterior() {
-        if (personas.length === 0) return;
-        indiceActual = (indiceActual - 1 + personas.length) % personas.length;
-        mostrarPersona();
-      }
-
-      function toggleAuto() {
-        if (estaReproduciendo) {
-          detenerAutoPlay();
-        } else {
-          iniciarAutoPlay();
-        }
-      }
-
-      function recargarDatos() {
-        cargarDatos();
-      }
-
-      function actualizarProgreso(porcentaje, visible) {
-        var box = document.getElementById('progresoBox');
-        var barra = document.getElementById('progresoBarra');
-        if (!box || !barra) return;
-        box.style.display = visible ? "block" : "none";
-        barra.style.width = Math.max(0, Math.min(100, porcentaje)) + "%";
-      }
-
-      function leerArchivoComoBase64(file) {
-        return new Promise(function(resolve, reject) {
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            var partes = String(e.target.result || "").split(',');
-            resolve({
-              filename: file.name || "archivo",
-              mimeType: file.type || "application/octet-stream",
-              data: partes[1] || ""
-            });
-          };
-          reader.onerror = function() {
-            reject(new Error("No se pudo leer el archivo."));
-          };
-          reader.readAsDataURL(file);
-        });
-      }
-
-      function prepararArchivoParaEnvio(file) {
-        if (file && file.type && file.type.startsWith("video/")) {
-          return leerArchivoComoBase64(file);
-        }
-
-        return new Promise(function(resolve) {
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            var img = new Image();
-            img.onload = function() {
-              var maxLado = 1400;
-              var ancho = img.width;
-              var alto = img.height;
-
-              if (ancho > maxLado || alto > maxLado) {
-                if (ancho >= alto) {
-                  alto = Math.round((alto * maxLado) / ancho);
-                  ancho = maxLado;
-                } else {
-                  ancho = Math.round((ancho * maxLado) / alto);
-                  alto = maxLado;
-                }
-              }
-
-              var canvas = document.createElement('canvas');
-              canvas.width = ancho;
-              canvas.height = alto;
-              var ctx = canvas.getContext('2d');
-              ctx.drawImage(img, 0, 0, ancho, alto);
-
-              var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-              var baseNombre = (file.name || "foto").replace(/\.[^/.]+$/, "");
-              resolve({
-                filename: baseNombre + ".jpg",
-                mimeType: "image/jpeg",
-                data: dataUrl.split(',')[1]
-              });
-            };
-            img.onerror = function() {
-              var partes = String(e.target.result).split(',');
-              resolve({
-                filename: file.name || "foto.jpg",
-                mimeType: file.type || "image/jpeg",
-                data: partes[1] || ""
-              });
-            };
-            img.src = e.target.result;
-          };
-          reader.readAsDataURL(file);
-        });
-      }
-
-      function subirUnArchivo(nombre, archivoListo, onAvance) {
-        return new Promise(function(resolve, reject) {
-          var pctActual = 15;
-          if (onAvance) onAvance(pctActual);
-
-          var timerSuave = setInterval(function() {
-            if (pctActual < 88) {
-              pctActual += 7;
-              if (onAvance) onAvance(pctActual);
-            }
-          }, 220);
-
-          var payload = {
-            nombre: nombre,
-            filename: archivoListo.filename,
-            mimeType: archivoListo.mimeType,
-            data: archivoListo.data,
-            carpetaUrl: carpetaDestinoE4
-          };
-
-          fetch(SCRIPT_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'text/plain;charset=utf-8'
-            },
-            body: JSON.stringify(payload)
-          })
-          .then(function(response) {
-            return response.json();
-          })
-          .then(function(res) {
-            clearInterval(timerSuave);
-            if (res && res.status === "success") {
-              if (onAvance) onAvance(100);
-              resolve(res);
-            } else {
-              reject(new Error(res && res.message ? res.message : "Respuesta inválida del servidor"));
-            }
-          })
-          .catch(function(err) {
-            clearInterval(timerSuave);
-            reject(err);
-          });
-        });
-      }
-
-      async function enviarFotos() {
-        var nombre = document.getElementById('nombreInput').value.trim();
-        var input = document.getElementById('archivoInput');
-        var status = document.getElementById('status');
-        var btn = document.getElementById('subirBtn');
-
-        if (!nombre || input.files.length === 0) {
-          status.style.color = "#E91E63";
-          status.innerText = "Por favor completa tu nombre y selecciona al menos un archivo.";
-          return;
-        }
-
-        var archivos = Array.from(input.files);
-        var total = archivos.length;
-        btn.disabled = true;
-        status.style.color = "#4FC3F7";
-        actualizarProgreso(0, true);
-
-        try {
-          for (var i = 0; i < total; i++) {
-            var basePorcentaje = (i / total) * 100;
-            status.innerText = `Preparando archivo ${i + 1} de ${total}... (${Math.round(basePorcentaje)}%)`;
-            var archivoListo = await prepararArchivoParaEnvio(archivos[i]);
-
-            await subirUnArchivo(nombre, archivoListo, function(pctArchivo) {
-              var pctTotal = Math.round(((i + (pctArchivo / 100)) / total) * 100);
-              actualizarProgreso(pctTotal, true);
-              status.innerText = `Subiendo archivo ${i + 1} de ${total}... ${pctTotal}%`;
-            });
-          }
-
-          actualizarProgreso(100, true);
-          status.style.color = "#4CAF50";
-          status.innerText = total > 1
-            ? `¡${total} archivos guardados (100%)! Actualizando muro...`
-            : "¡Archivo guardado (100%)! Actualizando muro...";
-
-          btn.disabled = false;
-          setTimeout(function() {
-            cerrarModales();
-            cargarDatos();
-          }, 1400);
-        } catch (err) {
-          status.style.color = "#E91E63";
-          status.innerText = "Error al subir: " + err.message;
-          btn.disabled = false;
-        }
-      }
-    </script>
-  </body>
-</html>
+          mediaHtml
