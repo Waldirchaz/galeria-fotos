@@ -747,6 +747,7 @@
       let estaReproduciendo = false;
       let timerCarga = null;
       let arrastrandoBarra = false;
+      let timerMetadataMov = null;
 
       window.onload = function() {
         cargarDatos();
@@ -756,12 +757,22 @@
       window.addEventListener("scroll", actualizarVisibilidadSubirArriba, { passive: true });
 
       function destruirVideoActivo() {
+        if (timerMetadataMov) {
+          clearTimeout(timerMetadataMov);
+          timerMetadataMov = null;
+        }
         var vid = document.getElementById("videoPropio");
         if (vid) {
           try {
             vid.pause();
             vid.removeAttribute("src");
             vid.load();
+          } catch (e) {}
+        }
+        var frame = document.getElementById("frameDriveRespaldo");
+        if (frame) {
+          try {
+            frame.removeAttribute("src");
           } catch (e) {}
         }
       }
@@ -774,12 +785,30 @@
         return min + ":" + (rest < 10 ? "0" + rest : rest);
       }
 
+      function obtenerUrlDirectaDrive(fileId) {
+        if (!fileId) return "";
+        return "https://drive.usercontent.google.com/download?id=" + encodeURIComponent(fileId) + "&export=download&confirm=t";
+      }
+
+      function esArchivoMov(item) {
+        if (!item) return false;
+        var texto = ((item.nombre || "") + " " + (item.urlOriginal || "") + " " + (item.foto || "")).toLowerCase();
+        return /\.mov(\?|$|#)/i.test(texto) || texto.includes("quicktime");
+      }
+
       function cambiarAFrameDrive(fileId) {
+        if (timerMetadataMov) {
+          clearTimeout(timerMetadataMov);
+          timerMetadataMov = null;
+        }
         var vid = document.getElementById("videoPropio");
         var barra = document.getElementById("barraVideoPropio");
         var frame = document.getElementById("frameDriveRespaldo");
         if (!fileId) return;
-        if (vid) vid.style.display = "none";
+        if (vid) {
+          try { vid.pause(); } catch (e) {}
+          vid.style.display = "none";
+        }
         if (barra) barra.style.display = "none";
         if (frame) {
           frame.src = "https://drive.google.com/file/d/" + encodeURIComponent(fileId) + "/preview";
@@ -841,7 +870,7 @@
         }
       }
 
-      function inicializarEventosVideoPropio() {
+      function inicializarEventosVideoPropio(esMov) {
         var vid = document.getElementById("videoPropio");
         var slider = document.getElementById("sliderVideoPropio");
         var tActual = document.getElementById("tiempoActualPropio");
@@ -849,7 +878,30 @@
         var btnPlay = document.getElementById("btnPlayPropio");
         if (!vid) return;
 
+        var contadorErrores = 0;
+        var metadataCargada = false;
+        var fileId = vid.getAttribute("data-fileid") || "";
+        var urlDirecta = vid.getAttribute("data-url") || "";
+
+        if (timerMetadataMov) {
+          clearTimeout(timerMetadataMov);
+          timerMetadataMov = null;
+        }
+
+        if (esMov && fileId) {
+          timerMetadataMov = setTimeout(function() {
+            if (!metadataCargada) {
+              cambiarAFrameDrive(fileId);
+            }
+          }, 8000);
+        }
+
         vid.addEventListener("loadedmetadata", function() {
+          metadataCargada = true;
+          if (timerMetadataMov) {
+            clearTimeout(timerMetadataMov);
+            timerMetadataMov = null;
+          }
           if (tTotal) tTotal.innerText = formatearTiempo(vid.duration);
         });
 
@@ -877,7 +929,16 @@
         });
 
         vid.addEventListener("error", function() {
-          var fileId = vid.getAttribute("data-fileid") || "";
+          contadorErrores += 1;
+          if (contadorErrores === 1) {
+            var fuentes = vid.querySelectorAll("source");
+            var segundaUrl = (fuentes && fuentes[1] && fuentes[1].src) ? fuentes[1].src : urlDirecta;
+            if (segundaUrl) {
+              vid.src = segundaUrl;
+              vid.load();
+              return;
+            }
+          }
           cambiarAFrameDrive(fileId);
         });
       }
@@ -1329,6 +1390,7 @@
         var stageEl = document.getElementById('slideStage');
         var controlesEl = document.getElementById('botonesControles');
         var videoModo = esVideo(p);
+        var esMov = esArchivoMov(p);
         var mediaHtml = "";
 
         if (modalEl) {
@@ -1360,13 +1422,16 @@
 
         if (videoModo) {
           var urlVideoDrive = fileId
-            ? "https://drive.google.com/uc?export=download&id=" + encodeURIComponent(fileId)
+            ? obtenerUrlDirectaDrive(fileId)
             : (p.urlOriginal || p.foto);
           var urlPoster = obtenerUrlImagen(p.foto, 800);
 
           mediaHtml = `
             <div class="custom-player-shell">
-              <video id="videoPropio" class="custom-video-surface" data-fileid="${fileId}" src="${urlVideoDrive}" poster="${urlPoster}" playsinline preload="metadata"></video>
+              <video id="videoPropio" class="custom-video-surface" data-fileid="${fileId}" data-url="${urlVideoDrive}" poster="${urlPoster}" playsinline preload="metadata">
+                <source src="${urlVideoDrive}" type="video/quicktime">
+                <source src="${urlVideoDrive}" type="video/mp4">
+              </video>
               <iframe id="frameDriveRespaldo" class="custom-drive-frame" style="display:none;" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
               <div id="barraVideoPropio" class="custom-player-bar">
                 <div class="custom-seek-row">
@@ -1398,14 +1463,14 @@
         actualizarBotonLikeSlide();
 
         if (videoModo) {
-          inicializarEventosVideoPropio();
+          inicializarEventosVideoPropio(esMov);
         }
       }
 
       function dispararDescargaItem(p, idx) {
         var fileId = p.fileId || extraerIdDrive(p.urlOriginal || p.foto);
         var urlDescarga = fileId
-          ? "https://drive.google.com/uc?export=download&id=" + encodeURIComponent(fileId)
+          ? obtenerUrlDirectaDrive(fileId)
           : p.foto;
 
         var baseNombre = (p.nombre || "archivo_" + (idx + 1))
