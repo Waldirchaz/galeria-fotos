@@ -161,7 +161,7 @@
         position: absolute;
         top: 8px;
         right: 8px;
-        background: rgba(0, 0, 0, 0.65);
+        background: rgba(0, 0, 0, 0.72);
         color: #fff;
         font-size: 11px;
         padding: 2px 6px;
@@ -245,7 +245,7 @@
       }
       .container {
         max-width: 96%;
-        max-height: 92vh;
+        max-height: 94vh;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -253,20 +253,76 @@
       .slide-stage {
         position: relative;
         display: inline-flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
+        min-width: 290px;
         max-width: 100%;
-        max-height: 62vh;
+        min-height: 220px;
+        max-height: 68vh;
         border-radius: 12px;
         overflow: hidden;
+        background: rgba(18, 18, 22, 0.72);
         box-shadow: 0 8px 28px rgba(0, 0, 0, 0.75);
       }
-      .slide-img,
-      .slide-video {
+      .btn-fullscreen-top {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        z-index: 6;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        font-size: 14px;
+        line-height: 1;
+        border-radius: 7px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(24, 24, 28, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        opacity: 0.85;
+      }
+      .btn-fullscreen-top:hover {
+        opacity: 1;
+        background-color: rgba(42, 42, 48, 0.92);
+      }
+      .slide-img {
         max-width: 100%;
-        max-height: 62vh;
+        max-height: 68vh;
+        width: auto;
+        height: auto;
         display: block;
         object-fit: contain;
+      }
+      .video-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 640px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .slide-video-local {
+        max-width: 100%;
+        max-height: 54vh;
+        border-radius: 10px;
+        background: #000;
+      }
+      .slide-video-frame {
+        width: 100%;
+        min-width: 290px;
+        max-width: 640px;
+        height: 300px;
+        border: 0;
+        border-radius: 10px;
+        background: #000;
+      }
+      .video-quick-controls {
+        margin-top: 8px;
+        display: flex;
+        gap: 6px;
+        justify-content: center;
       }
 
       /* CONTROLES SOBRE LA FOTO (2 FILAS, MISMO TAMAÑO Y ESTILO, LIGERAMENTE TRANSPARENTES) */
@@ -280,13 +336,14 @@
         flex-direction: column;
         align-items: center;
         gap: 5px;
+        max-width: calc(100% - 12px);
       }
       .controls-row {
         display: flex;
         gap: 5px;
         justify-content: center;
         align-items: center;
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
       }
       .controls-sobre-foto button {
         background-color: rgba(24, 24, 28, 0.72);
@@ -312,7 +369,7 @@
         text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
       }
 
-      /* VISTA 3: FORMULARIO DE SUBIDA SOBRE EL MURO */
+      /* VISTA 3 Y 4: TARJETAS SOBRE EL MURO */
       .card {
         background: rgba(28, 28, 32, 0.94);
         padding: 28px;
@@ -327,7 +384,7 @@
       .card h2 { text-align: center; color: #fff; font-size: 22px; text-shadow: none; }
       .form-group { margin-bottom: 18px; }
       label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #ddd; }
-      input[type="text"], input[type="file"] {
+      input[type="text"], input[type="email"], input[type="file"] {
         width: 100%;
         padding: 10px;
         border: 1px solid #555;
@@ -387,7 +444,7 @@
         background-color: rgba(39, 39, 44, 0.96);
       }
 
-      #status {
+      #status, #statusZip {
         margin-top: 12px;
         font-size: 14px;
         font-weight: 600;
@@ -409,7 +466,7 @@
       <div id="heroPortada" class="hero-portada">
         <div class="hero-top-bar">
           <button class="btn-compact" onclick="recargarDatos()">Actualizar</button>
-          <button class="btn-compact" onclick="descargarTodoMuro()">Descargar todo</button>
+          <button class="btn-compact" onclick="abrirModal('descargar')">Descargar todo</button>
         </div>
 
         <div class="hero-contenido">
@@ -431,7 +488,8 @@
     <!-- VISTA 2: SLIDESHOW SOBRE EL MURO -->
     <div id="vistaSlideshow" class="overlay-modal" onclick="cerrarSiFondo(event, 'vistaSlideshow')">
       <div class="container">
-        <div class="slide-stage">
+        <div id="slideStage" class="slide-stage">
+          <button id="btnFullscreen" class="btn-fullscreen-top" onclick="toggleFullscreenSlideshow()" title="Pantalla completa">⛶</button>
           <div id="contenidoSlide"></div>
 
           <div class="controls-sobre-foto" id="botonesControles">
@@ -479,6 +537,24 @@
       </div>
     </div>
 
+    <!-- VISTA 4: VENTANA EMERGENTE PARA ENVIAR ZIP POR CORREO -->
+    <div id="vistaDescargar" class="overlay-modal" onclick="cerrarSiFondo(event, 'vistaDescargar')">
+      <div class="card">
+        <h2>Descargar Álbum Completo</h2>
+        <p style="color: #bbb; font-size: 13px; margin-bottom: 20px; text-align: center;">Generaremos el archivo .zip de la carpeta y te enviaremos el enlace de descarga por correo.</p>
+
+        <div class="form-group">
+          <label for="correoZipInput">Tu Correo Electrónico:</label>
+          <input type="email" id="correoZipInput" placeholder="Ej. correo@ejemplo.com" required>
+        </div>
+
+        <button class="primary" style="width:100%; padding: 12px; margin-bottom: 10px;" id="enviarZipBtn" onclick="solicitarZipPorCorreo()">Enviar enlace a mi correo</button>
+        <button style="width:100%; background: rgba(68, 68, 76, 0.9); border:none; padding: 10px;" onclick="cerrarModales()">Cancelar</button>
+
+        <div id="statusZip"></div>
+      </div>
+    </div>
+
     <script>
       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7AXiZC4ux58UndrfTa8FVYIc8P9_oMWMKAbaEQU9ADaeuXXJzn2LgorRm07PqsYNayA/exec";
       const SHEET_ID = "1tgTEtJEJCwf57mrh04q4kC1tenLF-1KTjvpmDojLWRk";
@@ -486,6 +562,7 @@
 
       let personas = [];
       let carpetaDestinoE4 = "";
+      let tituloActualGaleria = "Galería";
       let indiceActual = 0;
       let intervaloAuto = null;
       let estaReproduciendo = false;
@@ -546,10 +623,30 @@
         }
       }
 
+      function salirFullscreenSiActivo() {
+        if (document.fullscreenElement && document.exitFullscreen) {
+          document.exitFullscreen().catch(function() {});
+        }
+      }
+
+      function toggleFullscreenSlideshow() {
+        var elem = document.getElementById('vistaSlideshow');
+        if (!elem) return;
+        if (!document.fullscreenElement) {
+          if (elem.requestFullscreen) {
+            elem.requestFullscreen().catch(function() {});
+          }
+        } else {
+          salirFullscreenSiActivo();
+        }
+      }
+
       function cerrarModales() {
         detenerAutoPlay();
+        salirFullscreenSiActivo();
         document.getElementById('vistaSlideshow').classList.remove('active');
         document.getElementById('vistaSubir').classList.remove('active');
+        document.getElementById('vistaDescargar').classList.remove('active');
       }
 
       function cerrarSiFondo(event, modalId) {
@@ -562,16 +659,23 @@
         detenerAutoPlay();
         document.getElementById('vistaSlideshow').classList.remove('active');
         document.getElementById('vistaSubir').classList.remove('active');
+        document.getElementById('vistaDescargar').classList.remove('active');
 
         if (modal === 'slideshow') {
           document.getElementById('vistaSlideshow').classList.add('active');
           mostrarPersona();
         } else if (modal === 'subir') {
+          salirFullscreenSiActivo();
           document.getElementById('vistaSubir').classList.add('active');
           document.getElementById('status').innerText = "";
           document.getElementById('nombreInput').value = "";
           document.getElementById('archivoInput').value = "";
           actualizarProgreso(0, false);
+        } else if (modal === 'descargar') {
+          salirFullscreenSiActivo();
+          document.getElementById('vistaDescargar').classList.add('active');
+          document.getElementById('statusZip').innerText = "";
+          document.getElementById('correoZipInput').value = "";
         }
       }
 
@@ -629,9 +733,9 @@
       }
 
       function aplicarConfiguracionPortada(titulo, fondoRaw, avatarRaw) {
-        var tituloFinal = (titulo && String(titulo).trim() !== "") ? String(titulo).trim() : "Galería";
-        document.getElementById('heroTitulo').textContent = tituloFinal;
-        document.title = tituloFinal;
+        tituloActualGaleria = (titulo && String(titulo).trim() !== "") ? String(titulo).trim() : "Galería";
+        document.getElementById('heroTitulo').textContent = tituloActualGaleria;
+        document.title = tituloActualGaleria;
 
         var heroEl = document.getElementById('heroPortada');
         if (fondoRaw && String(fondoRaw).trim() !== "") {
@@ -644,7 +748,7 @@
         var avatarEl = document.getElementById('heroAvatar');
         if (avatarRaw && String(avatarRaw).trim() !== "") {
           avatarEl.src = obtenerUrlImagen(avatarRaw, 500);
-          avatarEl.alt = tituloFinal;
+          avatarEl.alt = tituloActualGaleria;
           avatarEl.style.display = "block";
         } else {
           avatarEl.removeAttribute("src");
@@ -794,16 +898,42 @@
         `;
       }
 
+      function togglePlayVideoActivo() {
+        var vid = document.getElementById('videoLocalActivo');
+        if (!vid) return;
+        if (vid.paused) {
+          vid.play().catch(function() {});
+        } else {
+          vid.pause();
+        }
+      }
+
+      function toggleMuteVideoActivo() {
+        var vid = document.getElementById('videoLocalActivo');
+        var btn = document.getElementById('btnMuteVideo');
+        if (!vid) return;
+        vid.muted = !vid.muted;
+        if (btn) {
+          btn.innerText = vid.muted ? "🔊 Activar sonido" : "🔇 Silenciar";
+        }
+      }
+
       function mostrarPersona() {
         if (personas.length === 0) return;
         var p = personas[indiceActual];
         var nombreSeguro = escaparHtml(p.nombre);
+        var fileId = p.fileId || extraerIdDrive(p.foto);
         var mediaHtml = "";
 
         if (esVideo(p)) {
-          var urlVideo = obtenerUrlVideoDrive(p.fileId || extraerIdDrive(p.foto), p.foto);
+          var urlVideo = obtenerUrlVideoDrive(fileId, p.foto);
           mediaHtml = `
-            <iframe class="slide-video" src="${urlVideo}" width="480" height="320" allow="autoplay" allowfullscreen style="border:0; border-radius:12px;"></iframe>
+            <div class="video-wrapper">
+              <iframe class="slide-video-frame" src="${urlVideo}" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+              <div class="video-quick-controls">
+                <button class="btn-compact" onclick="descargarFotoActiva()">⬇ Ver / Descargar video</button>
+              </div>
+            </div>
           `;
         } else {
           var urlFoto = obtenerUrlImagen(p.foto, 1200);
@@ -848,12 +978,54 @@
         dispararDescargaItem(personas[indiceActual], indiceActual);
       }
 
-      function descargarTodoMuro() {
-        if (personas.length === 0) return;
-        personas.forEach(function(p, idx) {
-          setTimeout(function() {
-            dispararDescargaItem(p, idx);
-          }, idx * 800);
+      function solicitarZipPorCorreo() {
+        var emailInput = document.getElementById('correoZipInput');
+        var statusZip = document.getElementById('statusZip');
+        var btn = document.getElementById('enviarZipBtn');
+        var email = emailInput ? emailInput.value.trim() : "";
+
+        if (!email || email.indexOf("@") === -1) {
+          statusZip.style.color = "#E91E63";
+          statusZip.innerText = "Por favor escribe un correo válido.";
+          return;
+        }
+
+        btn.disabled = true;
+        statusZip.style.color = "#4FC3F7";
+        statusZip.innerText = "Comprimiendo carpeta y enviando correo...";
+
+        fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify({
+            accion: "enviar_zip_correo",
+            email: email,
+            carpetaUrl: carpetaDestinoE4,
+            titulo: tituloActualGaleria
+          })
+        })
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(res) {
+          btn.disabled = false;
+          if (res && res.status === "success") {
+            statusZip.style.color = "#4CAF50";
+            statusZip.innerText = res.message || "¡ZIP enviado a tu correo!";
+            setTimeout(function() {
+              cerrarModales();
+            }, 2200);
+          } else {
+            statusZip.style.color = "#E91E63";
+            statusZip.innerText = "Error: " + (res && res.message ? res.message : "No se pudo generar el ZIP.");
+          }
+        })
+        .catch(function(err) {
+          btn.disabled = false;
+          statusZip.style.color = "#E91E63";
+          statusZip.innerText = "Error de conexión: " + err.message;
         });
       }
 
