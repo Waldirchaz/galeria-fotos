@@ -14,12 +14,13 @@
         overflow-x: hidden;
       }
 
-      /* BOTÓN COMPACTO UNIFORME (IGUAL AL PRIMER RENGLÓN DEL SLIDESHOW) */
+      /* BOTÓN COMPACTO UNIFORME (MURO Y SLIDESHOW) */
       .btn-compact {
-        padding: 7px 10px;
-        font-size: 12px;
+        padding: 5px 8px;
+        font-size: 11px;
+        font-weight: 500;
         line-height: 1.2;
-        border-radius: 7px;
+        border-radius: 6px;
         white-space: nowrap;
       }
 
@@ -83,7 +84,7 @@
         right: 14px;
         z-index: 2;
         display: flex;
-        gap: 8px;
+        gap: 6px;
       }
       .hero-avatar {
         width: 112px;
@@ -268,7 +269,7 @@
         object-fit: contain;
       }
 
-      /* CONTROLES SOBRE LA FOTO (VISIBLES Y UN POQUITO TRANSPARENTES) */
+      /* CONTROLES SOBRE LA FOTO (2 FILAS, MISMO TAMAÑO Y ESTILO, LIGERAMENTE TRANSPARENTES) */
       .controls-sobre-foto {
         position: absolute;
         left: 6px;
@@ -278,22 +279,30 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
       }
       .controls-row {
         display: flex;
-        gap: 6px;
+        gap: 5px;
         justify-content: center;
         align-items: center;
         flex-wrap: nowrap;
       }
       .controls-sobre-foto button {
+        background-color: rgba(24, 24, 28, 0.72);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.25);
         opacity: 0.85;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
       }
       .controls-sobre-foto button:hover,
       .controls-sobre-foto button:focus {
+        background-color: rgba(42, 42, 48, 0.9);
         opacity: 1;
+      }
+      .controls-sobre-foto button.active-autoplay {
+        background-color: rgba(76, 175, 80, 0.78);
+        border-color: rgba(255, 255, 255, 0.35);
       }
 
       h2 {
@@ -351,7 +360,7 @@
       }
 
       button {
-        background-color: rgba(28, 28, 32, 0.78);
+        background-color: rgba(28, 28, 32, 0.82);
         color: white;
         border: 1px solid rgba(255, 255, 255, 0.24);
         padding: 10px 16px;
@@ -360,13 +369,13 @@
         font-size: 14px;
         transition: background 0.2s, transform 0.12s, opacity 0.2s;
       }
-      button:hover { background-color: rgba(50, 50, 58, 0.92); }
+      button:hover { background-color: rgba(50, 50, 58, 0.94); }
       button.primary { background-color: rgba(76, 175, 80, 0.85); border: none; }
       button.primary:hover { background-color: rgba(67, 160, 71, 0.98); }
       button.info { background-color: rgba(2, 136, 209, 0.85); border: none; }
       button.info:hover { background-color: rgba(2, 119, 189, 0.98); }
       button.album-btn {
-        background-color: rgba(24, 24, 27, 0.82);
+        background-color: rgba(24, 24, 27, 0.85);
         border: 1px solid rgba(255, 255, 255, 0.26);
         color: #ffffff;
         font-weight: 600;
@@ -399,7 +408,7 @@
     <div id="vistaMuro">
       <div id="heroPortada" class="hero-portada">
         <div class="hero-top-bar">
-          <button class="info btn-compact" onclick="recargarDatos()">Actualizar</button>
+          <button class="btn-compact" onclick="recargarDatos()">Actualizar</button>
           <button class="btn-compact" onclick="descargarTodoMuro()">Descargar todo</button>
         </div>
 
@@ -433,10 +442,8 @@
             </div>
             <div class="controls-row">
               <button class="btn-compact" onclick="cerrarModales()">🧱 Ver Muro</button>
-              <button class="info btn-compact" onclick="descargarFotoActiva()">⬇ Descargar</button>
-            </div>
-            <div class="controls-row">
-              <button class="album-btn btn-compact" onclick="abrirModal('subir')">➕ Añadir al álbum</button>
+              <button class="btn-compact" onclick="descargarFotoActiva()">⬇ Descargar</button>
+              <button class="btn-compact" onclick="abrirModal('subir')">➕ Añadir al álbum</button>
             </div>
           </div>
         </div>
@@ -532,10 +539,10 @@
         if (!btn) return;
         if (estaReproduciendo) {
           btn.innerText = "Pausar Auto-Play";
-          btn.classList.add('primary');
+          btn.classList.add('active-autoplay');
         } else {
           btn.innerText = "Iniciar Auto-Play";
-          btn.classList.remove('primary');
+          btn.classList.remove('active-autoplay');
         }
       }
 
@@ -782,7 +789,7 @@
         contenedor.className = "estado-muro";
         contenedor.innerHTML = `
           <p style="color: #ff6b6b;">No se pudieron cargar los datos (${detalle}).</p>
-          <button class="info btn-compact" onclick="recargarDatos()" style="margin-top: 12px;">Actualizar</button>
+          <button class="btn-compact" onclick="recargarDatos()" style="margin-top: 12px;">Actualizar</button>
           <button class="album-btn" onclick="abrirModal('subir')" style="margin-top: 12px;">➕ Añadir al álbum</button>
         `;
       }
@@ -842,17 +849,11 @@
       }
 
       function descargarTodoMuro() {
-        var carpetaId = extraerIdDrive(carpetaDestinoE4);
-        if (carpetaId) {
-          window.open("https://drive.google.com/drive/folders/" + encodeURIComponent(carpetaId), "_blank", "noopener");
-          return;
-        }
-
         if (personas.length === 0) return;
         personas.forEach(function(p, idx) {
           setTimeout(function() {
             dispararDescargaItem(p, idx);
-          }, idx * 900);
+          }, idx * 800);
         });
       }
 
