@@ -14,6 +14,15 @@
         overflow-x: hidden;
       }
 
+      /* BOTÓN COMPACTO UNIFORME (IGUAL AL PRIMER RENGLÓN DEL SLIDESHOW) */
+      .btn-compact {
+        padding: 7px 10px;
+        font-size: 12px;
+        line-height: 1.2;
+        border-radius: 7px;
+        white-space: nowrap;
+      }
+
       /* VISTA 1: MURO CON PORTADA SUPERIOR TIPO EVENTO */
       #vistaMuro {
         display: flex;
@@ -140,11 +149,22 @@
         transform: scale(1.015);
         border-color: #555;
       }
-      .muro-item img {
+      .muro-item img,
+      .muro-item video {
         width: 100%;
         height: 100%;
         object-fit: cover;
         display: block;
+      }
+      .badge-video {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: rgba(0, 0, 0, 0.65);
+        color: #fff;
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 4px;
       }
       .muro-caption {
         position: absolute;
@@ -223,43 +243,63 @@
         text-align: center;
       }
       .container {
-        max-width: 95%;
-        max-height: 90vh;
-      }
-      .slide-img {
-        max-width: 100%;
-        max-height: 52vh;
-        border-radius: 12px;
-        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.75);
-        object-fit: contain;
-        margin-bottom: 14px;
-      }
-      h2 {
-        margin: 6px 0;
-        font-size: 24px;
-        letter-spacing: 0.5px;
-        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
-      }
-
-      /* CONTROLES DEL SLIDESHOW EN 3 RENGLONES */
-      .controls {
-        margin-top: 14px;
+        max-width: 96%;
+        max-height: 92vh;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 8px;
+      }
+      .slide-stage {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        max-width: 100%;
+        max-height: 62vh;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.75);
+      }
+      .slide-img,
+      .slide-video {
+        max-width: 100%;
+        max-height: 62vh;
+        display: block;
+        object-fit: contain;
+      }
+
+      /* CONTROLES SOBRE LA FOTO (95% TRANSPARENCIA = 0.05 OPACIDAD) */
+      .controls-sobre-foto {
+        position: absolute;
+        left: 6px;
+        right: 6px;
+        bottom: 8px;
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
       }
       .controls-row {
         display: flex;
-        gap: 8px;
+        gap: 6px;
         justify-content: center;
         align-items: center;
         flex-wrap: nowrap;
       }
-      .controls-row.compact button {
-        padding: 7px 10px;
-        font-size: 12px;
-        white-space: nowrap;
+      .controls-sobre-foto button {
+        opacity: 0.05;
+      }
+      .controls-sobre-foto button:hover,
+      .controls-sobre-foto button:focus {
+        opacity: 0.35;
+      }
+
+      h2 {
+        margin: 10px 0 4px;
+        font-size: 22px;
+        letter-spacing: 0.5px;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
       }
 
       /* VISTA 3: FORMULARIO DE SUBIDA SOBRE EL MURO */
@@ -317,7 +357,7 @@
         border-radius: 8px;
         cursor: pointer;
         font-size: 14px;
-        transition: background 0.2s, transform 0.12s;
+        transition: background 0.2s, transform 0.12s, opacity 0.2s;
       }
       button:hover { background-color: rgba(50, 50, 58, 0.98); }
       button.primary { background-color: #4CAF50; border: none; }
@@ -358,7 +398,8 @@
     <div id="vistaMuro">
       <div id="heroPortada" class="hero-portada">
         <div class="hero-top-bar">
-          <button class="info" onclick="recargarDatos()" title="Actualizar galería">🔄</button>
+          <button class="info btn-compact" onclick="recargarDatos()">Actualizar</button>
+          <button class="btn-compact" onclick="descargarTodoMuro()">Descargar todo</button>
         </div>
 
         <div class="hero-contenido">
@@ -380,30 +421,34 @@
     <!-- VISTA 2: SLIDESHOW SOBRE EL MURO -->
     <div id="vistaSlideshow" class="overlay-modal" onclick="cerrarSiFondo(event, 'vistaSlideshow')">
       <div class="container">
-        <div id="contenidoSlide"></div>
+        <div class="slide-stage">
+          <div id="contenidoSlide"></div>
 
-        <div class="controls" id="botonesControles">
-          <div class="controls-row compact">
-            <button onclick="anterior()">❮ Anterior</button>
-            <button id="btnAuto" onclick="toggleAuto()">Iniciar Auto-Play</button>
-            <button onclick="siguiente()">Siguiente ❯</button>
-          </div>
-          <div class="controls-row">
-            <button onclick="cerrarModales()">🧱 Ver Muro</button>
-            <button class="info" onclick="descargarFotoActiva()">⬇ Descargar</button>
-          </div>
-          <div class="controls-row">
-            <button class="album-btn" onclick="abrirModal('subir')">➕ Añadir al álbum</button>
+          <div class="controls-sobre-foto" id="botonesControles">
+            <div class="controls-row">
+              <button class="btn-compact" onclick="anterior()">❮ Anterior</button>
+              <button id="btnAuto" class="btn-compact" onclick="toggleAuto()">Iniciar Auto-Play</button>
+              <button class="btn-compact" onclick="siguiente()">Siguiente ❯</button>
+            </div>
+            <div class="controls-row">
+              <button class="btn-compact" onclick="cerrarModales()">🧱 Ver Muro</button>
+              <button class="info btn-compact" onclick="descargarFotoActiva()">⬇ Descargar</button>
+            </div>
+            <div class="controls-row">
+              <button class="album-btn btn-compact" onclick="abrirModal('subir')">➕ Añadir al álbum</button>
+            </div>
           </div>
         </div>
+
+        <div id="pieSlide"></div>
       </div>
     </div>
 
     <!-- VISTA 3: FORMULARIO DE SUBIDA SOBRE EL MURO -->
     <div id="vistaSubir" class="overlay-modal" onclick="cerrarSiFondo(event, 'vistaSubir')">
       <div class="card">
-        <h2>Sube tu Fotografía</h2>
-        <p style="color: #bbb; font-size: 13px; margin-bottom: 20px; text-align: center;">Escribe tu nombre y elige una o varias fotos.</p>
+        <h2>Sube tu Fotografía o Video</h2>
+        <p style="color: #bbb; font-size: 13px; margin-bottom: 20px; text-align: center;">Escribe tu nombre y elige una o varias fotos o videos.</p>
         
         <div class="form-group">
           <label for="nombreInput">Tu Nombre:</label>
@@ -411,9 +456,9 @@
         </div>
 
         <div class="form-group">
-          <label for="archivoInput">Seleccionar Foto(s):</label>
-          <input type="file" id="archivoInput" accept="image/*" multiple required>
-          <span class="ayuda-multi">Puedes seleccionar una o varias fotos a la vez.</span>
+          <label for="archivoInput">Seleccionar Foto(s) o Video(s):</label>
+          <input type="file" id="archivoInput" accept="image/*,video/*" multiple required>
+          <span class="ayuda-multi">Puedes seleccionar una o varias fotos o videos a la vez.</span>
         </div>
 
         <button class="primary" style="width:100%; padding: 12px; margin-bottom: 10px;" id="subirBtn" onclick="enviarFotos()">Subir y Ver Muro</button>
@@ -432,6 +477,7 @@
       const INTERVALO_SLIDESHOW_MS = 7000;
 
       let personas = [];
+      let carpetaDestinoE4 = "";
       let indiceActual = 0;
       let intervaloAuto = null;
       let estaReproduciendo = false;
@@ -550,6 +596,19 @@
           : fotoOriginal;
       }
 
+      function obtenerUrlVideoDrive(fileId, fallbackUrl) {
+        if (fileId) {
+          return "https://drive.google.com/file/d/" + encodeURIComponent(fileId) + "/preview";
+        }
+        return fallbackUrl;
+      }
+
+      function esVideo(item) {
+        if (!item) return false;
+        var texto = ((item.nombre || "") + " " + (item.foto || "")).toLowerCase();
+        return /\.(mp4|mov|webm|m4v|avi|3gp)(\?|$)/i.test(texto) || texto.includes("video");
+      }
+
       function escaparHtml(texto) {
         return String(texto || "")
           .replace(/&/g, "&amp;")
@@ -595,8 +654,8 @@
         if (personas.length === 0) {
           contenedor.className = "estado-muro";
           contenedor.innerHTML = `
-            <p style="color: #888; font-style: italic;">No hay fotos registradas todavía.</p>
-            <button class="album-btn" onclick="abrirModal('subir')" style="margin-top: 15px; padding: 12px 24px; font-size: 15px;">➕ Añadir la primera foto</button>
+            <p style="color: #888; font-style: italic;">No hay fotos ni videos registrados todavía.</p>
+            <button class="album-btn" onclick="abrirModal('subir')" style="margin-top: 15px; padding: 12px 24px; font-size: 15px;">➕ Añadir al álbum</button>
           `;
           return;
         }
@@ -607,13 +666,16 @@
         personas.forEach(function(p, idx) {
           var urlFoto = obtenerUrlImagen(p.foto, 800);
           var nombreSeguro = escaparHtml(p.nombre);
+          var videoBadge = esVideo(p) ? `<span class="badge-video">▶ Video</span>` : "";
+
           html += `
             <div class="muro-item" onclick="abrirSlideshowEnFoto(${idx})" title="Ver en slideshow: ${nombreSeguro}">
               <img src="${urlFoto}" alt="${nombreSeguro}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
               <div class="muro-fallback" style="display:none;">
-                <span>Sin vista previa</span>
+                <span>${esVideo(p) ? "Video" : "Sin vista previa"}</span>
                 <strong>${nombreSeguro}</strong>
               </div>
+              ${videoBadge}
               <div class="muro-caption">${nombreSeguro}</div>
             </div>
           `;
@@ -633,16 +695,20 @@
           return;
         }
 
+        // Portada y carpeta en Columna E (índice 4): E1 (fila 0), E2 (fila 1), E3 (fila 2), E4 (fila 3)
         var fila1 = resp.table.rows[0];
         var fila2 = resp.table.rows[1];
         var fila3 = resp.table.rows[2];
+        var fila4 = resp.table.rows[3];
 
         var tituloE1 = obtenerValorCelda(fila1, 4);
         var fondoE2 = obtenerValorCelda(fila2, 4);
         var avatarE3 = obtenerValorCelda(fila3, 4);
+        carpetaDestinoE4 = obtenerValorCelda(fila4, 4);
 
         aplicarConfiguracionPortada(tituloE1, fondoE2, avatarE3);
 
+        // Galería: Nombre en Columna A (índice 0) y Archivo en Columna B (índice 1)
         var lista = [];
         resp.table.rows.forEach(function(filaObj, idx) {
           if (!filaObj || !Array.isArray(filaObj.c)) return;
@@ -714,7 +780,7 @@
         contenedor.className = "estado-muro";
         contenedor.innerHTML = `
           <p style="color: #ff6b6b;">No se pudieron cargar los datos (${detalle}).</p>
-          <button class="info" onclick="recargarDatos()" style="margin-top: 12px;">🔄 Reintentar</button>
+          <button class="info btn-compact" onclick="recargarDatos()" style="margin-top: 12px;">Actualizar</button>
           <button class="album-btn" onclick="abrirModal('subir')" style="margin-top: 12px;">➕ Añadir al álbum</button>
         `;
       }
@@ -722,39 +788,64 @@
       function mostrarPersona() {
         if (personas.length === 0) return;
         var p = personas[indiceActual];
-        var urlFoto = obtenerUrlImagen(p.foto, 1200);
         var nombreSeguro = escaparHtml(p.nombre);
+        var mediaHtml = "";
 
-        var html = `
-          <img class="slide-img" src="${urlFoto}" alt="${nombreSeguro}" referrerpolicy="no-referrer" onerror="this.style.display='none'; document.getElementById('avisoImg').style.display='block';">
-          <p id="avisoImg" style="display:none; color:#ff9800; font-size:14px;">No se pudo mostrar la imagen de ${nombreSeguro}.</p>
+        if (esVideo(p)) {
+          var urlVideo = obtenerUrlVideoDrive(p.fileId || extraerIdDrive(p.foto), p.foto);
+          mediaHtml = `
+            <iframe class="slide-video" src="${urlVideo}" width="480" height="320" allow="autoplay" allowfullscreen style="border:0; border-radius:12px;"></iframe>
+          `;
+        } else {
+          var urlFoto = obtenerUrlImagen(p.foto, 1200);
+          mediaHtml = `
+            <img class="slide-img" src="${urlFoto}" alt="${nombreSeguro}" referrerpolicy="no-referrer" onerror="this.style.display='none'; document.getElementById('avisoImg').style.display='block';">
+            <p id="avisoImg" style="display:none; color:#ff9800; font-size:14px;">No se pudo mostrar la imagen de ${nombreSeguro}.</p>
+          `;
+        }
+
+        document.getElementById('contenidoSlide').innerHTML = mediaHtml;
+        document.getElementById('pieSlide').innerHTML = `
           <h2>${nombreSeguro}</h2>
-          <p style="color: #eee; font-size: 14px;">(${indiceActual + 1} de ${personas.length})</p>
+          <p style="color: #eee; font-size: 14px; margin: 4px 0 0;">(${indiceActual + 1} de ${personas.length})</p>
         `;
-        document.getElementById('contenidoSlide').innerHTML = html;
       }
 
-      function descargarFotoActiva() {
-        if (personas.length === 0) return;
-        var p = personas[indiceActual];
+      function dispararDescargaItem(p, idx) {
         var fileId = p.fileId || extraerIdDrive(p.foto);
         var urlDescarga = fileId
           ? "https://drive.google.com/uc?export=download&id=" + encodeURIComponent(fileId)
           : p.foto;
 
-        var nombreArchivo = (p.nombre || "foto")
+        var baseNombre = (p.nombre || "archivo_" + (idx + 1))
           .toLowerCase()
           .replace(/[^a-z0-9-_]+/g, "_")
-          .replace(/^_+|_+$/g, "") || "foto";
+          .replace(/^_+|_+$/g, "") || ("archivo_" + (idx + 1));
+
+        var ext = esVideo(p) ? ".mp4" : ".jpg";
 
         var enlace = document.createElement('a');
         enlace.href = urlDescarga;
-        enlace.download = nombreArchivo + ".jpg";
+        enlace.download = baseNombre + "_" + (idx + 1) + ext;
         enlace.target = "_blank";
         enlace.rel = "noopener";
         document.body.appendChild(enlace);
         enlace.click();
         enlace.remove();
+      }
+
+      function descargarFotoActiva() {
+        if (personas.length === 0) return;
+        dispararDescargaItem(personas[indiceActual], indiceActual);
+      }
+
+      function descargarTodoMuro() {
+        if (personas.length === 0) return;
+        personas.forEach(function(p, idx) {
+          setTimeout(function() {
+            dispararDescargaItem(p, idx);
+          }, idx * 350);
+        });
       }
 
       function siguiente() {
@@ -789,7 +880,29 @@
         barra.style.width = Math.max(0, Math.min(100, porcentaje)) + "%";
       }
 
-      function prepararImagenParaEnvio(file) {
+      function leerArchivoComoBase64(file) {
+        return new Promise(function(resolve, reject) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            var partes = String(e.target.result || "").split(',');
+            resolve({
+              filename: file.name || "archivo",
+              mimeType: file.type || "application/octet-stream",
+              data: partes[1] || ""
+            });
+          };
+          reader.onerror = function() {
+            reject(new Error("No se pudo leer el archivo."));
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function prepararArchivoParaEnvio(file) {
+        if (file && file.type && file.type.startsWith("video/")) {
+          return leerArchivoComoBase64(file);
+        }
+
         return new Promise(function(resolve) {
           var reader = new FileReader();
           reader.onload = function(e) {
@@ -837,7 +950,7 @@
         });
       }
 
-      function subirUnaFoto(nombre, archivoListo, onAvance) {
+      function subirUnArchivo(nombre, archivoListo, onAvance) {
         return new Promise(function(resolve, reject) {
           var pctActual = 15;
           if (onAvance) onAvance(pctActual);
@@ -853,7 +966,8 @@
             nombre: nombre,
             filename: archivoListo.filename,
             mimeType: archivoListo.mimeType,
-            data: archivoListo.data
+            data: archivoListo.data,
+            carpetaUrl: carpetaDestinoE4
           };
 
           fetch(SCRIPT_URL, {
@@ -890,7 +1004,7 @@
 
         if (!nombre || input.files.length === 0) {
           status.style.color = "#E91E63";
-          status.innerText = "Por favor completa tu nombre y selecciona al menos una foto.";
+          status.innerText = "Por favor completa tu nombre y selecciona al menos un archivo.";
           return;
         }
 
@@ -903,21 +1017,21 @@
         try {
           for (var i = 0; i < total; i++) {
             var basePorcentaje = (i / total) * 100;
-            status.innerText = `Preparando foto ${i + 1} de ${total}... (${Math.round(basePorcentaje)}%)`;
-            var archivoListo = await prepararImagenParaEnvio(archivos[i]);
+            status.innerText = `Preparando archivo ${i + 1} de ${total}... (${Math.round(basePorcentaje)}%)`;
+            var archivoListo = await prepararArchivoParaEnvio(archivos[i]);
 
-            await subirUnaFoto(nombre, archivoListo, function(pctFoto) {
-              var pctTotal = Math.round(((i + (pctFoto / 100)) / total) * 100);
+            await subirUnArchivo(nombre, archivoListo, function(pctArchivo) {
+              var pctTotal = Math.round(((i + (pctArchivo / 100)) / total) * 100);
               actualizarProgreso(pctTotal, true);
-              status.innerText = `Subiendo foto ${i + 1} de ${total}... ${pctTotal}%`;
+              status.innerText = `Subiendo archivo ${i + 1} de ${total}... ${pctTotal}%`;
             });
           }
 
           actualizarProgreso(100, true);
           status.style.color = "#4CAF50";
           status.innerText = total > 1
-            ? `¡${total} fotos guardadas (100%)! Actualizando muro...`
-            : "¡Foto guardada (100%)! Actualizando muro...";
+            ? `¡${total} archivos guardados (100%)! Actualizando muro...`
+            : "¡Archivo guardado (100%)! Actualizando muro...";
 
           btn.disabled = false;
           setTimeout(function() {
