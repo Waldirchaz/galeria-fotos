@@ -252,8 +252,8 @@
       }
       .overlay-modal.modo-video-modal {
         justify-content: center;
-        padding-top: 14px;
-        padding-bottom: 20px;
+        padding-top: 12px;
+        padding-bottom: 18px;
       }
       .overlay-modal.pseudo-fullscreen {
         position: fixed !important;
@@ -333,58 +333,112 @@
         display: block;
         object-fit: contain;
       }
-      .video-box-limpio {
-        position: relative;
+
+      /* REPRODUCTOR PROPIO DE VIDEO */
+      .custom-player-shell {
         width: 100%;
         border-radius: 12px;
         overflow: hidden;
-        background: #141418;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.75);
-      }
-      .video-movil-card {
+        background: #0d0d10;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.78);
         display: flex;
         flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        padding: 18px 14px;
       }
-      .video-movil-thumb {
+      .custom-video-surface {
         width: 100%;
-        max-height: 34vh;
+        max-height: 46vh;
+        min-height: 200px;
+        background: #000000;
+        display: block;
         object-fit: contain;
-        border-radius: 8px;
-        background: #000;
-      }
-      .btn-abrir-video-movil {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 10px 18px;
-        border-radius: 8px;
-        background: #4CAF50;
-        color: #ffffff;
-        font-weight: 700;
-        font-size: 14px;
-        text-decoration: none;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
-      }
-      .slide-video-frame {
-        display: none;
       }
       @media (min-width: 640px) {
-        .video-movil-card {
-          display: none;
+        .custom-video-surface {
+          max-height: 54vh;
+          min-height: 280px;
         }
-        .slide-video-frame {
-          display: block;
-          width: 100%;
-          height: 420px;
-          border: 0;
-          background: #0f0f13;
-        }
+      }
+      .custom-player-bar {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px 12px;
+        background: #17171c;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .custom-seek-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+      }
+      .custom-time-label {
+        font-size: 11px;
+        color: #d4d4d8;
+        font-variant-numeric: tabular-nums;
+        min-width: 34px;
+        text-align: center;
+      }
+      input[type="range"].custom-seek-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        flex: 1;
+        height: 6px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.22);
+        outline: none;
+        cursor: pointer;
+        margin: 0;
+        padding: 0;
+      }
+      input[type="range"].custom-seek-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #4CAF50;
+        border: 2px solid #ffffff;
+        cursor: pointer;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+      }
+      input[type="range"].custom-seek-slider::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #4CAF50;
+        border: 2px solid #ffffff;
+        cursor: pointer;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+      }
+      .custom-transport-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .custom-transport-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .custom-ctrl-btn {
+        padding: 6px 11px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 7px;
+        background: #27272f;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        color: #ffffff;
+      }
+      .custom-ctrl-btn:hover {
+        background: #353540;
+      }
+      .custom-video-status {
+        font-size: 11px;
+        color: #a1a1aa;
+        text-align: right;
       }
 
       /* CONTROLES SOBRE LA FOTO (SOLO PARA FOTOS) */
@@ -686,6 +740,7 @@
       let intervaloAuto = null;
       let estaReproduciendo = false;
       let timerCarga = null;
+      let arrastrandoBarra = false;
 
       window.onload = function() {
         cargarDatos();
@@ -693,6 +748,124 @@
       };
 
       window.addEventListener("scroll", actualizarVisibilidadSubirArriba, { passive: true });
+
+      function destruirVideoActivo() {
+        var vid = document.getElementById("videoPropio");
+        if (vid) {
+          try {
+            vid.pause();
+            vid.removeAttribute("src");
+            vid.load();
+          } catch (e) {}
+        }
+      }
+
+      function formatearTiempo(seg) {
+        if (!isFinite(seg) || seg < 0) return "0:00";
+        var total = Math.floor(seg);
+        var min = Math.floor(total / 60);
+        var rest = total % 60;
+        return min + ":" + (rest < 10 ? "0" + rest : rest);
+      }
+
+      function togglePlayVideoPropio() {
+        var vid = document.getElementById("videoPropio");
+        var btn = document.getElementById("btnPlayPropio");
+        if (!vid) return;
+        if (vid.paused) {
+          vid.play().then(function() {
+            if (btn) btn.innerText = "⏸ Pausa";
+          }).catch(function() {
+            var st = document.getElementById("estadoVideoPropio");
+            if (st) st.innerText = "No se pudo iniciar el video desde Drive.";
+          });
+        } else {
+          vid.pause();
+          if (btn) btn.innerText = "▶ Play";
+        }
+      }
+
+      function toggleMuteVideoPropio() {
+        var vid = document.getElementById("videoPropio");
+        var btn = document.getElementById("btnMutePropio");
+        if (!vid) return;
+        vid.muted = !vid.muted;
+        if (btn) {
+          btn.innerText = vid.muted ? "🔇 Mute" : "🔊 Sonido";
+        }
+      }
+
+      function iniciarArrastreSeek() {
+        arrastrandoBarra = true;
+      }
+
+      function moverSeekEnTiempoReal() {
+        var vid = document.getElementById("videoPropio");
+        var slider = document.getElementById("sliderVideoPropio");
+        var tActual = document.getElementById("tiempoActualPropio");
+        if (!vid || !slider) return;
+        var dur = vid.duration || 0;
+        if (dur > 0) {
+          var nuevoTiempo = (Number(slider.value) / 1000) * dur;
+          if (tActual) tActual.innerText = formatearTiempo(nuevoTiempo);
+        }
+      }
+
+      function soltarSeekVideo() {
+        var vid = document.getElementById("videoPropio");
+        var slider = document.getElementById("sliderVideoPropio");
+        arrastrandoBarra = false;
+        if (!vid || !slider) return;
+        var dur = vid.duration || 0;
+        if (dur > 0) {
+          vid.currentTime = (Number(slider.value) / 1000) * dur;
+        }
+      }
+
+      function inicializarEventosVideoPropio() {
+        var vid = document.getElementById("videoPropio");
+        var slider = document.getElementById("sliderVideoPropio");
+        var tActual = document.getElementById("tiempoActualPropio");
+        var tTotal = document.getElementById("tiempoTotalPropio");
+        var btnPlay = document.getElementById("btnPlayPropio");
+        var st = document.getElementById("estadoVideoPropio");
+        if (!vid) return;
+
+        vid.addEventListener("loadedmetadata", function() {
+          if (tTotal) tTotal.innerText = formatearTiempo(vid.duration);
+          if (st) st.innerText = "Listo";
+        });
+
+        vid.addEventListener("timeupdate", function() {
+          if (arrastrandoBarra) return;
+          var dur = vid.duration || 0;
+          if (tActual) tActual.innerText = formatearTiempo(vid.currentTime);
+          if (tTotal && dur > 0) tTotal.innerText = formatearTiempo(dur);
+          if (slider && dur > 0) {
+            slider.value = Math.round((vid.currentTime / dur) * 1000);
+          }
+        });
+
+        vid.addEventListener("play", function() {
+          if (btnPlay) btnPlay.innerText = "⏸ Pausa";
+          if (st) st.innerText = "Reproduciendo";
+        });
+
+        vid.addEventListener("pause", function() {
+          if (btnPlay) btnPlay.innerText = "▶ Play";
+          if (!vid.ended && st) st.innerText = "Pausado";
+        });
+
+        vid.addEventListener("ended", function() {
+          if (btnPlay) btnPlay.innerText = "▶ Play";
+          if (slider) slider.value = 0;
+          if (st) st.innerText = "Finalizado";
+        });
+
+        vid.addEventListener("error", function() {
+          if (st) st.innerText = "Drive no permitió reproducir este archivo directamente.";
+        });
+      }
 
       function cargarVotosLocales() {
         try {
@@ -867,6 +1040,7 @@
       }
 
       function cerrarModales() {
+        destruirVideoActivo();
         detenerAutoPlay();
         salirFullscreenSiActivo();
         var slideModal = document.getElementById('vistaSlideshow');
@@ -883,6 +1057,9 @@
       }
 
       function abrirModal(modal) {
+        if (modal !== 'slideshow') {
+          destruirVideoActivo();
+        }
         detenerAutoPlay();
         document.getElementById('vistaSlideshow').classList.remove('active');
         document.getElementById('vistaSubir').classList.remove('active');
@@ -1128,6 +1305,8 @@
 
       function mostrarPersona() {
         if (personas.length === 0) return;
+        destruirVideoActivo();
+
         var p = personas[indiceActual];
         var nombreSeguro = escaparHtml(p.nombre);
         var fileId = p.fileId || extraerIdDrive(p.urlOriginal || p.foto);
@@ -1165,21 +1344,28 @@
         }
 
         if (videoModo) {
-          var urlPreview = fileId
-            ? "https://drive.google.com/file/d/" + encodeURIComponent(fileId) + "/preview"
+          var urlVideoDrive = fileId
+            ? "https://drive.google.com/uc?export=download&id=" + encodeURIComponent(fileId)
             : (p.urlOriginal || p.foto);
-          var urlMovilDrive = fileId
-            ? "https://drive.google.com/file/d/" + encodeURIComponent(fileId) + "/view"
-            : urlPreview;
-          var urlThumb = obtenerUrlImagen(p.foto, 800);
+          var urlPoster = obtenerUrlImagen(p.foto, 800);
 
           mediaHtml = `
-            <div class="video-box-limpio">
-              <div class="video-movil-card">
-                <img class="video-movil-thumb" src="${urlThumb}" alt="${nombreSeguro}" referrerpolicy="no-referrer">
-                <a class="btn-abrir-video-movil" href="${urlMovilDrive}" target="_blank" rel="noopener">▶ Reproducir video en Drive</a>
+            <div class="custom-player-shell">
+              <video id="videoPropio" class="custom-video-surface" src="${urlVideoDrive}" poster="${urlPoster}" playsinline preload="metadata"></video>
+              <div class="custom-player-bar">
+                <div class="custom-seek-row">
+                  <span id="tiempoActualPropio" class="custom-time-label">0:00</span>
+                  <input id="sliderVideoPropio" type="range" class="custom-seek-slider" min="0" max="1000" value="0" onmousedown="iniciarArrastreSeek()" ontouchstart="iniciarArrastreSeek()" oninput="moverSeekEnTiempoReal()" onchange="soltarSeekVideo()" aria-label="Barra de avance del video">
+                  <span id="tiempoTotalPropio" class="custom-time-label">0:00</span>
+                </div>
+                <div class="custom-transport-row">
+                  <div class="custom-transport-left">
+                    <button id="btnPlayPropio" type="button" class="custom-ctrl-btn" onclick="togglePlayVideoPropio()">▶ Play</button>
+                    <button id="btnMutePropio" type="button" class="custom-ctrl-btn" onclick="toggleMuteVideoPropio()">🔊 Sonido</button>
+                  </div>
+                  <span id="estadoVideoPropio" class="custom-video-status">Cargando...</span>
+                </div>
               </div>
-              <iframe class="slide-video-frame" src="${urlPreview}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
             </div>
           `;
         } else {
@@ -1197,6 +1383,10 @@
           <p style="color: #eee; font-size: 14px; margin: 4px 0 0;">(${indiceActual + 1} de ${personas.length})</p>
         `;
         actualizarBotonLikeSlide();
+
+        if (videoModo) {
+          inicializarEventosVideoPropio();
+        }
       }
 
       function dispararDescargaItem(p, idx) {
