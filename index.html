@@ -282,10 +282,10 @@
         min-width: 290px;
         max-width: 100%;
         min-height: 220px;
-        max-height: 72vh;
+        max-height: 74vh;
         border-radius: 12px;
         overflow: hidden;
-        background: rgba(18, 18, 22, 0.82);
+        background: rgba(18, 18, 22, 0.85);
         box-shadow: 0 8px 28px rgba(0, 0, 0, 0.75);
       }
       .btn-fullscreen-top {
@@ -320,10 +320,10 @@
       }
       .video-wrapper {
         position: relative;
-        width: 82vw;
-        min-width: 270px;
-        max-width: 616px;
-        padding: 10px 10px 70px;
+        width: 84vw;
+        min-width: 280px;
+        max-width: 640px;
+        padding: 10px 10px 72px;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
@@ -339,7 +339,7 @@
       }
       .slide-video-el {
         width: 100%;
-        max-height: 42vh;
+        max-height: 44vh;
         border-radius: 10px;
         background: #000;
         display: block;
@@ -350,21 +350,21 @@
         left: 50%;
         transform: translate(-50%, -50%);
         z-index: 6;
-        padding: 8px 14px;
-        font-size: 13px;
+        padding: 9px 15px;
+        font-size: 14px;
         font-weight: 700;
         border-radius: 999px;
-        background-color: rgba(24, 24, 28, 0.78);
+        background-color: rgba(24, 24, 28, 0.82);
         border: 1px solid rgba(255, 255, 255, 0.35);
-        opacity: 0.88;
+        opacity: 0.9;
       }
       .btn-center-play:hover {
         opacity: 1;
-        background-color: rgba(42, 42, 48, 0.95);
+        background-color: rgba(42, 42, 48, 0.96);
       }
       .slide-video-frame {
         width: 100%;
-        height: 250px;
+        height: 260px;
         border: 0;
         border-radius: 10px;
         background: #000;
@@ -880,13 +880,13 @@
         if (!url) return "";
         var limpio = String(url).trim();
         if (limpio.includes("/d/")) {
-          return limpio.split("/d/")[1].split("/")[0].split("?")[0].trim();
+          return limpio.split("/d/")[1].split("/")[0].split("?")[0].split("#")[0].trim();
         }
         if (limpio.includes("/folders/")) {
-          return limpio.split("/folders/")[1].split("/")[0].split("?")[0].trim();
+          return limpio.split("/folders/")[1].split("/")[0].split("?")[0].split("#")[0].trim();
         }
         if (limpio.includes("id=")) {
-          return limpio.split("id=")[1].split("&")[0].trim();
+          return limpio.split("id=")[1].split("&")[0].split("#")[0].trim();
         }
         if (/^[a-zA-Z0-9_-]{15,}$/.test(limpio)) {
           return limpio;
@@ -912,7 +912,7 @@
       function esVideo(item) {
         if (!item) return false;
         var texto = ((item.nombre || "") + " " + (item.urlOriginal || "") + " " + (item.foto || "")).toLowerCase();
-        return /\.(mp4|mov|webm|m4v|avi|3gp)(\?|$)/i.test(texto) || texto.includes("video") || texto.includes("/preview");
+        return /\.(mp4|mov|webm|m4v|avi|3gp)(\?|$|#)/i.test(texto) || texto.includes("video") || texto.includes("/preview");
       }
 
       function escaparHtml(texto) {
@@ -1122,7 +1122,7 @@
           mediaHtml = `
             <div class="video-wrapper">
               <div id="videoDirectoBox" class="video-stage-inner">
-                <video id="videoReproductor" class="slide-video-el" src="${urlStream}" autoplay muted playsinline controls onplay="var b=document.getElementById('btnCentroPlay'); if(b) b.innerText='⏸';" onpause="var b=document.getElementById('btnCentroPlay'); if(b) b.innerText='▶';" onerror="document.getElementById('videoDirectoBox').style.display='none'; document.getElementById('videoIframeBox').style.display='block';"></video>
+                <video id="videoReproductor" class="slide-video-el" src="${urlStream}" autoplay muted playsinline controls onloadedmetadata="this.play().catch(function(){ var b=document.getElementById('btnCentroPlay'); if(b) b.innerText='▶'; });" onplay="var b=document.getElementById('btnCentroPlay'); if(b) b.innerText='⏸';" onpause="var b=document.getElementById('btnCentroPlay'); if(b) b.innerText='▶';" onerror="document.getElementById('videoDirectoBox').style.display='none'; document.getElementById('videoIframeBox').style.display='block';"></video>
                 <button id="btnCentroPlay" type="button" class="btn-center-play" onclick="toggleCentroVideo()" title="Play / Pausa">⏸</button>
               </div>
               <div id="videoIframeBox" style="display:none; width:100%;">
@@ -1144,18 +1144,6 @@
           <p style="color: #eee; font-size: 14px; margin: 4px 0 0;">(${indiceActual + 1} de ${personas.length})</p>
         `;
         actualizarBotonLikeSlide();
-
-        if (esVideo(p)) {
-          setTimeout(function() {
-            var vid = document.getElementById('videoReproductor');
-            if (vid && typeof vid.play === "function") {
-              vid.play().catch(function() {
-                var btn = document.getElementById('btnCentroPlay');
-                if (btn) btn.innerText = "▶";
-              });
-            }
-          }, 80);
-        }
       }
 
       function dispararDescargaItem(p, idx) {
