@@ -656,6 +656,7 @@
       const paramsUrl = new URLSearchParams(window.location.search);
       const eventoSlug = (paramsUrl.get("evento") || EVENTO_DEFAULT).trim().toLowerCase();
       const SHEET_ID = EVENTOS_GALERIA[eventoSlug] || EVENTOS_GALERIA[EVENTO_DEFAULT];
+      console.log("Evento activo:", eventoSlug, "Sheet ID:", SHEET_ID);
 
       const INTERVALO_SLIDESHOW_MS = 7000;
       const STORAGE_LIKES_KEY = "galeria_likes_voto_" + SHEET_ID;
