@@ -268,7 +268,7 @@
         object-fit: contain;
       }
 
-      /* CONTROLES SOBRE LA FOTO (95% TRANSPARENCIA = 0.05 OPACIDAD) */
+      /* CONTROLES SOBRE LA FOTO (VISIBLES Y UN POQUITO TRANSPARENTES) */
       .controls-sobre-foto {
         position: absolute;
         left: 6px;
@@ -288,11 +288,12 @@
         flex-wrap: nowrap;
       }
       .controls-sobre-foto button {
-        opacity: 0.05;
+        opacity: 0.85;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
       }
       .controls-sobre-foto button:hover,
       .controls-sobre-foto button:focus {
-        opacity: 0.35;
+        opacity: 1;
       }
 
       h2 {
@@ -350,23 +351,23 @@
       }
 
       button {
-        background-color: rgba(28, 28, 32, 0.92);
+        background-color: rgba(28, 28, 32, 0.78);
         color: white;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.24);
         padding: 10px 16px;
         border-radius: 8px;
         cursor: pointer;
         font-size: 14px;
         transition: background 0.2s, transform 0.12s, opacity 0.2s;
       }
-      button:hover { background-color: rgba(50, 50, 58, 0.98); }
-      button.primary { background-color: #4CAF50; border: none; }
-      button.primary:hover { background-color: #43a047; }
-      button.info { background-color: rgba(2, 136, 209, 0.92); border: none; }
-      button.info:hover { background-color: #0277BD; }
+      button:hover { background-color: rgba(50, 50, 58, 0.92); }
+      button.primary { background-color: rgba(76, 175, 80, 0.85); border: none; }
+      button.primary:hover { background-color: rgba(67, 160, 71, 0.98); }
+      button.info { background-color: rgba(2, 136, 209, 0.85); border: none; }
+      button.info:hover { background-color: rgba(2, 119, 189, 0.98); }
       button.album-btn {
-        background-color: rgba(24, 24, 27, 0.92);
-        border: 1px solid rgba(255, 255, 255, 0.24);
+        background-color: rgba(24, 24, 27, 0.82);
+        border: 1px solid rgba(255, 255, 255, 0.26);
         color: #ffffff;
         font-weight: 600;
         padding: 11px 18px;
@@ -374,7 +375,7 @@
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
       }
       button.album-btn:hover {
-        background-color: rgba(39, 39, 44, 0.98);
+        background-color: rgba(39, 39, 44, 0.96);
       }
 
       #status {
@@ -579,10 +580,13 @@
         if (limpio.includes("/d/")) {
           return limpio.split("/d/")[1].split("/")[0].split("?")[0].trim();
         }
+        if (limpio.includes("/folders/")) {
+          return limpio.split("/folders/")[1].split("/")[0].split("?")[0].trim();
+        }
         if (limpio.includes("id=")) {
           return limpio.split("id=")[1].split("&")[0].trim();
         }
-        if (/^[a-zA-Z0-9_-]{20,}$/.test(limpio)) {
+        if (/^[a-zA-Z0-9_-]{15,}$/.test(limpio)) {
           return limpio;
         }
         return "";
@@ -695,7 +699,6 @@
           return;
         }
 
-        // Portada y carpeta en Columna E (índice 4): E1 (fila 0), E2 (fila 1), E3 (fila 2), E4 (fila 3)
         var fila1 = resp.table.rows[0];
         var fila2 = resp.table.rows[1];
         var fila3 = resp.table.rows[2];
@@ -708,7 +711,6 @@
 
         aplicarConfiguracionPortada(tituloE1, fondoE2, avatarE3);
 
-        // Galería: Nombre en Columna A (índice 0) y Archivo en Columna B (índice 1)
         var lista = [];
         resp.table.rows.forEach(function(filaObj, idx) {
           if (!filaObj || !Array.isArray(filaObj.c)) return;
@@ -840,11 +842,17 @@
       }
 
       function descargarTodoMuro() {
+        var carpetaId = extraerIdDrive(carpetaDestinoE4);
+        if (carpetaId) {
+          window.open("https://drive.google.com/drive/folders/" + encodeURIComponent(carpetaId), "_blank", "noopener");
+          return;
+        }
+
         if (personas.length === 0) return;
         personas.forEach(function(p, idx) {
           setTimeout(function() {
             dispararDescargaItem(p, idx);
-          }, idx * 350);
+          }, idx * 900);
         });
       }
 
