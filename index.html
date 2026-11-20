@@ -299,15 +299,17 @@
         position: relative;
         width: 100%;
         max-width: 640px;
+        padding: 12px 12px 68px;
+        box-sizing: border-box;
         display: flex;
         flex-direction: column;
         align-items: center;
       }
       .slide-video-frame {
         width: 100%;
-        min-width: 290px;
-        max-width: 640px;
-        height: 300px;
+        min-width: 270px;
+        max-width: 616px;
+        height: 270px;
         border: 0;
         border-radius: 10px;
         background: #000;
@@ -317,6 +319,7 @@
         display: flex;
         gap: 6px;
         justify-content: center;
+        flex-wrap: wrap;
       }
 
       /* CONTROLES SOBRE LA FOTO (2 FILAS, MISMO TAMAÑO Y ESTILO, LIGERAMENTE TRANSPARENTES) */
@@ -944,7 +947,7 @@
             <div class="video-wrapper">
               <iframe class="slide-video-frame" src="${urlVideo}" allow="autoplay; encrypted-media" allowfullscreen></iframe>
               <div class="video-quick-controls">
-                <button class="btn-compact" onclick="descargarFotoActiva()">⬇ Ver / Descargar video</button>
+                <button class="btn-compact" onclick="descargarFotoActiva()">⬇ Descargar video (.mov / original)</button>
               </div>
             </div>
           `;
@@ -974,7 +977,7 @@
           .replace(/[^a-z0-9-_]+/g, "_")
           .replace(/^_+|_+$/g, "") || ("archivo_" + (idx + 1));
 
-        var ext = esVideo(p) ? ".mp4" : ".jpg";
+        var ext = esVideo(p) ? ".mov" : ".jpg";
 
         var enlace = document.createElement('a');
         enlace.href = urlDescarga;
