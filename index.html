@@ -78,6 +78,41 @@
         align-items: flex-start;
         gap: 14px;
       }
+      .hero-brand-bar {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        max-width: calc(100% - 190px);
+      }
+      .brand-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 5px 8px;
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1.2;
+        border-radius: 6px;
+        text-decoration: none;
+        white-space: nowrap;
+        background-color: rgba(24, 24, 28, 0.84);
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        transition: background 0.2s, transform 0.12s;
+      }
+      .brand-pill:hover {
+        background-color: rgba(44, 44, 52, 0.96);
+      }
+      .brand-pill.tiktok {
+        color: #7dd3fc;
+      }
+      .brand-pill.whatsapp {
+        color: #4ade80;
+      }
       .hero-top-bar {
         position: absolute;
         top: 14px;
@@ -544,6 +579,11 @@
     <!-- VISTA 1: MURO INICIAL CON PORTADA SUPERIOR (SIEMPRE VISIBLE DE FONDO) -->
     <div id="vistaMuro">
       <div id="heroPortada" class="hero-portada">
+        <div class="hero-brand-bar">
+          <a class="brand-pill tiktok" href="https://www.tiktok.com/@brilla.eventos.cdmx" target="_blank" rel="noopener">TikTok: @brilla.eventos.cdmx</a>
+          <a class="brand-pill whatsapp" href="https://wa.me/525575475462" target="_blank" rel="noopener">WhatsApp: 55 7547 5462</a>
+        </div>
+
         <div class="hero-top-bar">
           <button type="button" class="btn-compact" onclick="recargarDatos()">Actualizar</button>
           <button type="button" class="btn-compact" onclick="abrirModal('descargar')">Descargar todo</button>
@@ -645,8 +685,12 @@
 
     <script>
       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw4NvLvWG3ErKTyfZJjIxcm9e9CD9zv7wpG81X4dDae1c91AIw-v1OLPfhVQB7EWck6Ag/exec";
+
       const SHEET_CONTROL_ID = "1r3klz84o7U3nJLqrXp2vJxf2iHDLSHpLUk8XGqBSw_w";
       const SHEET_ID_DEFAULT = "1tgTEtJEJCwf57mrh04q4kC1tenLF-1KTjvpmDojLWRk";
+
+      const FONDO_DEFAULT_B2 = "https://drive.google.com/file/d/1EcXmNYkqKtgJJGE2GvTSNc5qMFqHCnfs/view?usp=drivesdk";
+      const AVATAR_DEFAULT_B3 = "https://drive.google.com/file/d/1YNLnd3IMU3VrFeXlltuwh5kO4J_V4CAV/view?usp=drivesdk";
 
       const INTERVALO_SLIDESHOW_MS = 7000;
 
@@ -654,7 +698,8 @@
       let storageLikesKey = "galeria_likes_voto_" + SHEET_ID_DEFAULT;
       let personas = [];
       let votosLocales = {};
-      let carpetaDestinoE4 = "";
+      let carpetaDestinoB4 = "";
+      let correoDefaultB5 = "";
       let tituloActualGaleria = "Galería";
       let indiceActual = 0;
       let intervaloAuto = null;
@@ -923,7 +968,7 @@
           document.getElementById("vistaSlideshow").classList.remove("modo-video-modal");
           document.getElementById("vistaDescargar").classList.add("active");
           document.getElementById("statusZip").innerText = "";
-          document.getElementById("correoZipInput").value = "";
+          document.getElementById("correoZipInput").value = correoDefaultB5 || "";
         }
       }
 
@@ -979,17 +1024,20 @@
         document.getElementById("heroTitulo").textContent = tituloActualGaleria;
         document.title = tituloActualGaleria;
 
+        var fondoEfectivo = (fondoRaw && String(fondoRaw).trim() !== "") ? String(fondoRaw).trim() : FONDO_DEFAULT_B2;
+        var avatarEfectivo = (avatarRaw && String(avatarRaw).trim() !== "") ? String(avatarRaw).trim() : AVATAR_DEFAULT_B3;
+
         var heroEl = document.getElementById("heroPortada");
-        if (fondoRaw && String(fondoRaw).trim() !== "") {
-          var urlFondo = obtenerUrlImagen(fondoRaw, 1600);
+        if (fondoEfectivo) {
+          var urlFondo = obtenerUrlImagen(fondoEfectivo, 1600);
           heroEl.style.backgroundImage = 'url("' + urlFondo.replace(/"/g, "%22") + '")';
         } else {
           heroEl.style.backgroundImage = "none";
         }
 
         var avatarEl = document.getElementById("heroAvatar");
-        if (avatarRaw && String(avatarRaw).trim() !== "") {
-          avatarEl.src = obtenerUrlImagen(avatarRaw, 500);
+        if (avatarEfectivo) {
+          avatarEl.src = obtenerUrlImagen(avatarEfectivo, 500);
           avatarEl.alt = tituloActualGaleria;
           avatarEl.style.display = "block";
         } else {
@@ -1117,7 +1165,7 @@
 
         var script = document.createElement("script");
         script.id = "gvizControlScript";
-        script.src = "https://docs.google.com/spreadsheets/d/" + encodeURIComponent(SHEET_CONTROL_ID) + "/gviz/tq?gid=0&tqx=out:json;responseHandler:recibirControlGviz&_=" + Date.now();
+        script.src = "https://docs.google.com/spreadsheets/d/" + encodeURIComponent(SHEET_CONTROL_ID) + "/gviz/tq?gid=0&headers=0&tqx=out:json;responseHandler:recibirControlGviz&_=" + Date.now();
         script.onerror = function() {
           if (timerControl) clearTimeout(timerControl);
           activarHojaGaleria(SHEET_ID_DEFAULT);
@@ -1145,21 +1193,24 @@
         var fila2 = resp.table.rows[1];
         var fila3 = resp.table.rows[2];
         var fila4 = resp.table.rows[3];
+        var fila5 = resp.table.rows[4];
 
-        var tituloE1 = obtenerValorCelda(fila1, 4);
-        var fondoE2 = obtenerValorCelda(fila2, 4);
-        var avatarE3 = obtenerValorCelda(fila3, 4);
-        carpetaDestinoE4 = obtenerValorCelda(fila4, 4);
+        var tituloB1 = obtenerValorCelda(fila1, 1);
+        var fondoB2 = obtenerValorCelda(fila2, 1);
+        var avatarB3 = obtenerValorCelda(fila3, 1);
+        carpetaDestinoB4 = obtenerValorCelda(fila4, 1);
+        correoDefaultB5 = obtenerValorCelda(fila5, 1);
 
-        aplicarConfiguracionPortada(tituloE1, fondoE2, avatarE3);
+        aplicarConfiguracionPortada(tituloB1, fondoB2, avatarB3);
 
         var lista = [];
         resp.table.rows.forEach(function(filaObj, idx) {
+          if (idx < 7) return;
           if (!filaObj || !Array.isArray(filaObj.c)) return;
 
           var nombre = obtenerValorCelda(filaObj, 0);
           var celdaB = obtenerValorCelda(filaObj, 1);
-          var likesRaw = obtenerValorCelda(filaObj, 5);
+          var likesRaw = obtenerValorCelda(filaObj, 3);
           var likesNum = Number(likesRaw) || 0;
           var idB = extraerIdDrive(celdaB);
 
@@ -1172,7 +1223,7 @@
 
           if (urlFoto !== "") {
             if (!nombre || nombre.startsWith("Date(")) {
-              nombre = "Invitado " + (idx + 1);
+              nombre = "Invitado " + (idx - 6);
             }
             lista.push({
               nombre: nombre,
@@ -1210,7 +1261,7 @@
 
         var script = document.createElement("script");
         script.id = "gvizScript";
-        script.src = "https://docs.google.com/spreadsheets/d/" + encodeURIComponent(idHoja) + "/gviz/tq?gid=0&tqx=out:json;responseHandler:recibirHojaGviz&_=" + Date.now();
+        script.src = "https://docs.google.com/spreadsheets/d/" + encodeURIComponent(idHoja) + "/gviz/tq?gid=0&headers=0&tqx=out:json;responseHandler:recibirHojaGviz&_=" + Date.now();
         script.onerror = function() {
           if (timerCarga) clearTimeout(timerCarga);
           mostrarErrorCarga("No se pudo conectar con Google Sheets.");
@@ -1349,7 +1400,7 @@
             accion: "enviar_zip_correo",
             sheetId: sheetIdActivo,
             email: email,
-            carpetaUrl: carpetaDestinoE4,
+            carpetaUrl: carpetaDestinoB4,
             titulo: tituloActualGaleria
           })
         })
@@ -1496,7 +1547,7 @@
             filename: archivoListo.filename,
             mimeType: archivoListo.mimeType,
             data: archivoListo.data,
-            carpetaUrl: carpetaDestinoE4
+            carpetaUrl: carpetaDestinoB4
           };
 
           fetch(SCRIPT_URL, {
