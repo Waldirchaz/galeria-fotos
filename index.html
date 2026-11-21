@@ -75,34 +75,37 @@
         z-index: 1;
         display: flex;
         flex-direction: column;
-        align-items: flex-start;
+        align-items: flex-end;
+        text-align: right;
         gap: 14px;
       }
       .hero-brand-bar {
         position: absolute;
-        top: 12px;
-        left: 12px;
+        bottom: 14px;
+        left: 14px;
         z-index: 2;
         display: flex;
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-start;
         gap: 4px;
-        flex-wrap: wrap;
-        max-width: calc(100% - 150px);
+        max-width: calc(100% - 170px);
       }
       @media (min-width: 640px) {
         .hero-brand-bar {
-          top: 14px;
-          left: 14px;
+          bottom: 24px;
+          left: 24px;
+          flex-direction: row;
+          align-items: center;
           gap: 6px;
-          max-width: calc(100% - 190px);
+          max-width: calc(100% - 260px);
         }
       }
       .brand-pill {
         display: inline-flex;
         align-items: center;
         gap: 3px;
-        padding: 3.5px 6px;
-        font-size: 9.5px;
+        padding: 2.5px 5px;
+        font-size: 8.5px;
         font-weight: 600;
         line-height: 1.15;
         border-radius: 5px;
