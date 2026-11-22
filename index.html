@@ -80,29 +80,31 @@
       }
       .hero-brand-bar {
         position: absolute;
-        top: 12px;
-        left: 12px;
+        bottom: 14px;
+        right: 14px;
         z-index: 2;
         display: flex;
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-end;
         gap: 4px;
-        flex-wrap: wrap;
-        max-width: calc(100% - 150px);
+        max-width: calc(100% - 170px);
       }
       @media (min-width: 640px) {
         .hero-brand-bar {
-          top: 14px;
-          left: 14px;
+          bottom: 24px;
+          right: 24px;
+          flex-direction: row;
+          align-items: center;
           gap: 6px;
-          max-width: calc(100% - 190px);
+          max-width: calc(100% - 260px);
         }
       }
       .brand-pill {
         display: inline-flex;
         align-items: center;
         gap: 3px;
-        padding: 3.5px 6px;
-        font-size: 9.5px;
+        padding: 2.5px 5px;
+        font-size: 8.5px;
         font-weight: 600;
         line-height: 1.15;
         border-radius: 5px;
@@ -1189,7 +1191,7 @@
 
         var script = document.createElement("script");
         script.id = "gvizControlScript";
-        script.src = "https://docs.google.com/spreadsheets/d/" + encodeURIComponent(SHEET_CONTROL_ID) + "/gviz/tq?gid=0&headers=0&tqx=out:json;responseHandler:recibirControlGviz&_=" + Date.now();
+        script.src = "https://docs.google.com/spreadsheets/d/" + encodeURIComponent(SHEET_CONTROL_ID) + "/gviz/tq?gid=0&range=A1:B200&tqx=out:json;responseHandler:recibirControlGviz&_=" + Date.now();
         script.onerror = function() {
           if (timerControl) clearTimeout(timerControl);
           activarHojaGaleria(SHEET_ID_DEFAULT);
@@ -1229,6 +1231,7 @@
 
         var lista = [];
         resp.table.rows.forEach(function(filaObj, idx) {
+          // idx 7 corresponde a la fila 8 en Google Sheets (0-indexed)
           if (idx < 7) return;
           if (!filaObj || !Array.isArray(filaObj.c)) return;
 
@@ -1285,7 +1288,7 @@
 
         var script = document.createElement("script");
         script.id = "gvizScript";
-        script.src = "https://docs.google.com/spreadsheets/d/" + encodeURIComponent(idHoja) + "/gviz/tq?gid=0&headers=0&tqx=out:json;responseHandler:recibirHojaGviz&_=" + Date.now();
+        script.src = "https://docs.google.com/spreadsheets/d/" + encodeURIComponent(idHoja) + "/gviz/tq?gid=0&range=A1:D1000&tqx=out:json;responseHandler:recibirHojaGviz&_=" + Date.now();
         script.onerror = function() {
           if (timerCarga) clearTimeout(timerCarga);
           mostrarErrorCarga("No se pudo conectar con Google Sheets.");
