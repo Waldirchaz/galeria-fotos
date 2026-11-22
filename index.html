@@ -38,7 +38,6 @@
       .hero-portada {
         position: relative;
         width: 100%;
-        max-width: 960px;
         min-height: 310px;
         background-color: #1c1b29;
         background-size: cover;
@@ -52,6 +51,8 @@
       }
       @media (min-width: 640px) {
         .hero-portada {
+          width: 100%;
+          max-width: none;
           min-height: 360px;
           padding: 32px 28px 30px;
           border-bottom-left-radius: 14px;
@@ -172,13 +173,14 @@
 
       .muro-grid-wrapper {
         width: 100%;
-        max-width: 960px;
         padding: 12px 10px 0;
         box-sizing: border-box;
       }
       @media (min-width: 640px) {
         .muro-grid-wrapper {
-          padding: 18px 0 0;
+          width: 100%;
+          max-width: none;
+          padding: 18px 24px 0;
         }
       }
       .muro-grid {
