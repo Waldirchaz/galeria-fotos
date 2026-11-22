@@ -1046,7 +1046,11 @@
       }
 
       function aplicarConfiguracionPortada(titulo, fondoRaw, avatarRaw) {
-        tituloActualGaleria = (titulo && String(titulo).trim() !== "") ? String(titulo).trim() : "Galería";
+        var tituloLimpio = (titulo && String(titulo).trim() !== "") ? String(titulo).trim() : "";
+        if (/^https?:\/\//i.test(tituloLimpio)) {
+          tituloLimpio = "";
+        }
+        tituloActualGaleria = tituloLimpio || "Galería";
         document.getElementById("heroTitulo").textContent = tituloActualGaleria;
         document.title = tituloActualGaleria;
 
@@ -1230,8 +1234,7 @@
         aplicarConfiguracionPortada(tituloB1, fondoB2, avatarB3);
 
         var lista = [];
-        resp.table.rows.forEach(function(filaObj, idx) {
-          if (idx < 7) return;
+        resp.table.rows.forEach(function(filaObj) {
           if (!filaObj || !Array.isArray(filaObj.c)) return;
 
           var nombre = obtenerValorCelda(filaObj, 0);
@@ -1239,6 +1242,18 @@
           var likesRaw = obtenerValorCelda(filaObj, 3);
           var likesNum = Number(likesRaw) || 0;
           var idB = extraerIdDrive(celdaB);
+
+          var nombreLower = String(nombre || "").toLowerCase();
+          if (
+            nombreLower === "nombre" ||
+            nombreLower === "fondo" ||
+            nombreLower === "avatar" ||
+            nombreLower === "carpeta" ||
+            nombreLower === "correo" ||
+            nombreLower.includes("nombre / invitado")
+          ) {
+            return;
+          }
 
           var urlFoto = "";
           if (idB) {
@@ -1249,7 +1264,7 @@
 
           if (urlFoto !== "") {
             if (!nombre || nombre.startsWith("Date(")) {
-              nombre = "Invitado " + (idx - 6);
+              nombre = "Invitado " + (lista.length + 1);
             }
             lista.push({
               nombre: nombre,
@@ -1287,7 +1302,7 @@
 
         var script = document.createElement("script");
         script.id = "gvizScript";
-        script.src = "https://docs.google.com/spreadsheets/d/" + encodeURIComponent(idHoja) + "/gviz/tq?gid=0&headers=0&tqx=out:json;responseHandler:recibirHojaGviz&_=" + Date.now();
+        script.src = "https://docs.google.com/spreadsheets/d/" + encodeURIComponent(idHoja) + "/gviz/tq?gid=0&range=A1:D1000&headers=0&tqx=out:json;responseHandler:recibirHojaGviz&_=" + Date.now();
         script.onerror = function() {
           if (timerCarga) clearTimeout(timerCarga);
           mostrarErrorCarga("No se pudo conectar con Google Sheets.");
